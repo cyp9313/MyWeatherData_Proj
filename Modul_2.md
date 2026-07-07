@@ -103,3 +103,46 @@ This document summarizes the content of the presentation "Generative AI in Syste
         *   **Quality Gate**: `@Req_Reviewer` performs the final review of the deliverables.
 
 ---
+
+#### **Deutsche Zusammenfassung (德语总结)**
+
+---
+
+### **Generative KI in der System- und Softwareentwicklung – Modul 2: Requirement Engineering**
+
+---
+
+#### **Agenda (Inhalt)**
+
+1.  **Grundlagen Requirement Engineering**
+    *   **Kernkonzepte**:
+        *   **Epic**: Beschreibt eine umfangreiche Initiative auf strategischer Ebene.
+        *   **User Story**: Bricht Epics aus der Nutzerperspektive in lieferbare Inkremente herunter (Fokus: Wer, Was, Warum).
+        *   **Functional Requirement (FR)**: Detailliert die technische Umsetzung aus der Systemperspektive (Fokus: Wie und Was das System tun muss).
+    *   **Wie Gen-KI hilft**:
+        *   **Epic-Ebene**: Hilft beim Brainstorming von Features, Scouting von Technologien, Identifizieren von Abhängigkeiten und schlägt sinnvolle "Schnitte" (Slicing) vor.
+        *   **User-Story-Ebene**: Generiert User Stories aus einer Epic-Beschreibung und leitet Akzeptanzkriterien für Edge Cases (z.B. Verhalten bei Sensorausfall) ab.
+        *   **FR-Ebene**: Transformiert natürlichsprachliche User Stories in formale Requirements und prüft diese automatisiert auf Widersprüche oder fehlende Parameter.
+    *   **EARS-Syntax**: Die KI ist besonders gut darin, User Stories exakt in die strengen Muster der EARS-Syntax (Easy Approach to Requirements Syntax) zu übersetzen, um Mehrdeutigkeit zu reduzieren.
+
+2.  **Inhaltliches Arbeiten mit KI im Requirement Engineering**
+    *   **Strukturierter Trichter (Von der Produktidee zum Epic)**: Ein 6-Phasen-Prozess, der KI für Context Engineering, divergentes Denken (Feature-Ideen), Technology Scouting, konvergentes Filtern (Reality Check), Konsolidierung zum Epic und Vernetzung von Epics nutzt.
+    *   **Epic Slicing**: Agil erfordert "vertikales Slicing", um schnell testbaren Wert zu generieren. Die KI kann logische Slices vorschlagen (z.B. "Happy Path" zuerst, dann Edge Cases).
+    *   **User Stories & Akzeptanzkriterien**: Die KI übersetzt technische Notizen in die Nutzerperspektive und formuliert Akzeptanzkriterien im BDD-Format (Given/When/Then). Als "Advocatus Diaboli" deckt sie realistische Edge Cases auf.
+    *   **Functional Requirements**: Die KI überführt den Nutzer-Fokus in den System-Fokus und hält sich strikt an formale Schablonen wie EARS, um weiche Formulierungen zu vermeiden (Anweisung: "Verwende ausschließlich MUSS oder DARF NICHT").
+
+3.  **Automatisierung mit Custom Prompts, Skills, Agents**
+    *   **Hybrides Setup**: Kombination von schnellen, schablonenhaften Prompts für grobe Strukturen mit spezialisierten virtuellen Experten (Agents) für die methodische Ausarbeitung.
+    *   **Ordnerstruktur (`.github/`)**:
+        *   **`copilot-instructions.md`**: Globaler Projektkontext.
+        *   **`/prompts`**: Schablonen für wiederkehrende Aufgaben (z.B. Epic-Brainstorming).
+        *   **`/skills`**: Das "Handwerkszeug" der Agents (z.B. INVEST-Kriterien, BDD-Format).
+        *   **`/agents`**: Die virtuellen Experten selbst (z.B. `@Story_Crafter`).
+    *   **Agenten-Beispiele**:
+        *   **@Story_Crafter**: Leitet aus Epic-Slices präzise User Stories ab und formuliert Akzeptanzkriterien.
+        *   **@Req_Engineer**: Übersetzt agile Stories in harte, testbare System-Requirements mittels EARS-Syntax.
+        *   **@Req_Reviewer**: Ein dedizierter Prüf-Agent, der nichts generiert, sondern Arbeitsprodukte auf Konformität und Qualität prüft.
+    *   **Workflow**: Ein klar definierter Prozess von der Ideen-Generierung mit Prompts über die Ausarbeitung auf User- und System-Ebene durch Agents bis hin zum finalen Qualitäts-Check durch den Reviewer-Agent.
+
+---
+

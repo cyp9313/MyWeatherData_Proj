@@ -83,3 +83,31 @@ This document summarizes the content of the presentation "Generative AI in Syste
         *   **Shift in Engineering**: The role of engineers will shift from being "domain experts" to "generalists" who take on end-to-end responsibility, with AI expertise being a fundamental prerequisite.
 
 ---
+
+
+#### **Deutsche Zusammenfassung (德语总结)**
+
+---
+
+### **Generative KI in der System- und Softwareentwicklung – Modul 1: Einführung**
+
+---
+
+#### **Agenda (Inhalt)**
+*(This section summarizes point 3 of the agenda)*
+
+3.  **Einführung: AI Agents in der Produktentwicklung im V-Modell**
+    *   **Grundlegende Überlegungen**:
+        *   **Perfekte KI**: In einer idealen Welt würde die KI Anforderungen direkt in ein validiertes Produkt umwandeln. Die Realität erfordert jedoch die Berücksichtigung von Randbedingungen wie Variantenmanagement oder Bauraum.
+        *   **Fehlerbehaftete KI**: Realistische KI hat eine Fehlerquote. Bei einem mehrstufigen Prozess sinkt die Wahrscheinlichkeit eines fehlerfreien Gesamtergebnisses mit jedem Schritt exponentiell. (z.B. bei 99% Trefferquote pro Schritt ist die Erfolgswahrscheinlichkeit nach 10 Schritten nur noch ~90%, bei 95% nur noch ~60%).
+    *   **Maßnahmen**:
+        *   Einführung von KI-assistierten "Review"-Phasen nach jedem wesentlichen Schritt im V-Modell (Requirement Engineering, Architektur, Design, Implementierung).
+        *   Ebenso werden auf der rechten Seite des V-Modells die Testphasen (Unit Test, Integration Test, Validation Test) durch KI-Reviews unterstützt.
+        *   Durch diese iterativen Qualitäts-Checks wird die Gesamt-Erfolgsquote drastisch erhöht (z.B. von ~67/100 auf ~99/100).
+    *   **Fazit**:
+        *   **Agentic-AI**: Die Orchestrierung eines Agenten-Systems ist der Schlüssel.
+        *   **Qualität der Agents**: Eine hohe Trefferquote der Agenten reduziert die Anzahl der Prozessschritte und damit den Token-Verbrauch und die Kosten.
+        *   **Review- und Testprozesse**: Bleiben unerlässlich, können aber ebenfalls durch KI-Agenten unterstützt werden.
+        *   **Wandel im Engineering**: Die Rolle des Ingenieurs verschiebt sich vom "Domänen-Experten" zum "Generalisten" mit End-to-End-Verantwortung. KI-Expertise wird zur Grundvoraussetzung.
+
+---

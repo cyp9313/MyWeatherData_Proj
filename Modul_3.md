@@ -97,3 +97,53 @@ This document summarizes the content of the presentation "Generative AI in Syste
         *   **Human-in-the-Loop**: The human project manager reviews the audit, allocates capacities, and makes the final decision.
 
 ---
+
+#### **Deutsche Zusammenfassung (德语总结)**
+
+---
+
+### **Generative KI in der System- und Softwareentwicklung – Modul 3: Projektmanagement**
+
+---
+
+#### **Agenda (Inhalt)**
+
+1.  **Aufwandsabschätzung**
+    *   **Herausforderung**: Engineering-Projekte sind komplex und unscharf. Schätzungen basieren oft auf unvollständigen Informationen und menschlichem Bias (Optimismus).
+    *   **Wie Gen-KI hilft**:
+        *   Analyse von User Stories auf Vollständigkeit (Definition of Ready).
+        *   Identifikation von versteckten technischen Schulden, Edge Cases und Abhängigkeiten.
+        *   Erstellung von Referenz-Vergleichen zur Einordnung der Komplexität.
+        *   Simulation einer „Zweiten Meinung“ für das Planning Poker.
+    *   **KI-gestützter Schätzprozess**:
+        *   **Phase 1: Context Engineering und Baselining**: Der KI werden das Team-Setup, die Systemgrenzen und das Schätzmodell erklärt. Referenz-Stories dienen als Maßstab.
+        *   **Phase 2: Komplexitätsanalyse, Schätzvorschlag & Begründung**: Die KI zerlegt die User Story, identifiziert Aufwandstreiber und "Blind Spots" und nutzt einen Multi-Model-Ansatz (z.B. Gemini, GPT-4) zur Kreuzvalidierung.
+        *   **Phase 3: Konsolidieren der Ergebnisse**: Um den „Sycophancy-Effekt“ (Zustimmungs-Bias) der KI zu umgehen, wird sie in die Rolle eines kritischen „Technical Auditor“ versetzt, der eine faktenbasierte Entscheidung treffen muss, anstatt Kompromisse zu finden.
+
+2.  **Projektplan**
+    *   **Herausforderung**: Die Projektplanung im Embedded-Bereich erfordert die Synchronisation von Hardware- und Softwarezyklen und ist oft von versteckten Abhängigkeiten geprägt.
+    *   **Wie Gen-KI hilft**:
+        *   **Strukturierung**: Schnelle Erstellung initialer Projektstrukturpläne (PSP/WBS) aus Epics und User Stories.
+        *   **Abhängigkeitsanalyse**: Identifikation von logischen und technischen Blockern (z.B. Software wartet auf Hardware-Muster).
+        *   **Plausibilitätsprüfung**: Stresstest von manuell erstellten Zeitplänen durch Simulation von Worst-Case-Szenarien.
+    *   **Anwendungsbeispiele**:
+        *   **Strukturierung & Meilensteine**: Logische und zeitliche Anordnung von Epics für ein V2G-Release.
+        *   **Abhängigkeitsanalyse**: Ein Multi-Model-Ansatz, bei dem ein Modell den Plan erstellt und ein anderes Modell nach Fehlern sucht.
+        *   **Simulation & Risikomanagement**: Nutzung der KI als "Advocatus Diaboli", um Puffer für das Risikomanagement einzuplanen und Alternativ-Szenarien (Plan B) vorzubereiten.
+
+3.  **Automatisierung mit Agents und Skills**
+    *   **Konzept**: Aufgaben werden von einem Agenten ausgeführt, der tief in der agilen Methodik und der Projekt-Architektur verankert ist und selbstständig nach Referenzen sucht.
+    *   **Agenten-Beispiele**:
+        *   **@Agile_Estimator**: Liefert fundierte Aufwandsschätzungen unter Verwendung von Skills wie `/pm_framework` und `/complexity_baseline`.
+        *   **@Sprint_Planner**: Übersetzt geschätzte Stories in eine logische Abhängigkeitskette und orchestriert Hardware- und Software-Zyklen.
+        *   **@Risk_Auditor**: Dient als Qualitätstor, indem er Pläne einem Stresstest unterzieht, um Schwachstellen aufzudecken.
+    *   **Workflow**:
+        *   **Basis**: `copilot-instructions.md` liefert den globalen Kontext.
+        *   **Daily Business**: `@Agile_Estimator` für schnelle Schätzungen.
+        *   **Tiefe Schätzung**: `@Agile_Estimator` nutzt spezifische Skills für präzise Story Points.
+        *   **Zeitplanung**: `@Sprint_Planner` orchestriert die Phasen.
+        *   **Qualitätstor**: `@Risk_Auditor` prüft den Plan auf Schwachstellen.
+        *   **Human-in-the-Loop**: Der menschliche Projektleiter sichtet das Audit, weist Kapazitäten zu und trifft die finale Entscheidung.
+
+---
+

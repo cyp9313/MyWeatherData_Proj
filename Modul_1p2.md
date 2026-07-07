@@ -87,3 +87,42 @@ To make AI work more efficiently and controllably within a specific project, a l
     *   **Invocation**: Can be selected and activated from the `@` menu in the chat window.
 
 ---
+
+#### **Deutsche Zusammenfassung (德语总结)**
+
+---
+
+### **Generative KI in der System- und Softwareentwicklung – Modul 1.2: Customization**
+
+---
+
+#### **Grundlagen: Die vier Customization-Ebenen**
+
+Um die KI effizient und steuerbar in einem Projekt einzusetzen, wird eine hierarchische Anpassungsstrategie verwendet.
+
+1.  **Projekt-Konventionen (`copilot-instructions.md`)**
+    *   **Zweck**: Enthält grundlegende Informationen und Anweisungen, die im gesamten Projektkontext **immer** gelten.
+    *   **Prinzip**: "So viel wie nötig, so wenig wie möglich", da die Datei bei jedem Chat gelesen wird und den Kontext für alle Interaktionen bildet.
+
+2.  **Custom Prompts (`/prompts`)**
+    *   **Zweck**: Dienen als wiederverwendbare Vorlagen für sich wiederholende Aufgaben.
+    *   **Aufbau**: Eine `.prompt.md`-Datei mit `name`, `description` und optional `argument-hint`.
+    *   **Aufruf**: Direkt im Chatfenster über den Befehl `/Prompt_Name`, optional mit einem Argument (z.B. einem Dateipfad).
+
+3.  **Skills (`/skills`)**
+    *   **Zweck**: Kapseln Informationen, Abläufe und Vorgaben für **bestimmte** Aufgaben. Sie sind der "Werkzeugkasten" für Agents und Prompts.
+    *   **Aufbau**: Jeder Skill hat einen eigenen Ordner (`/<Skill_Name>/`) mit einer zentralen `SKILL.md`-Datei und optionalen weiteren Ressourcen (z.B. Referenzdokumente, Code).
+    *   **Eigenschaften**:
+        *   **Offener Standard**: Ermöglicht einen einfachen Wechsel zwischen verschiedenen KI-Anbietern.
+        *   **Wiederverwendbar**: Können im Chat, von Prompts oder von Agents genutzt werden.
+
+4.  **Agents (`/agents`)**
+    *   **Zweck**: Sind virtuelle KI-Experten, die Aufgaben **selbständig** bearbeiten können. Sie stellen die höchste Abstraktionsebene dar.
+    *   **Aufbau**: Eine `.agent.md`-Datei, die den Namen, die Beschreibung, die zu verwendenden Tools (`read`, `search` etc.) und das KI-Modell definiert.
+    *   **Fähigkeiten**:
+        *   Werden durch **Skills** befähigt.
+        *   Verwenden **Tools**, um mit der Umgebung zu interagieren.
+        *   Können andere **Sub-Agents** aufrufen.
+    *   **Aufruf**: Werden über das `@`-Menü im Chatfenster ausgewählt und aktiviert.
+
+---
