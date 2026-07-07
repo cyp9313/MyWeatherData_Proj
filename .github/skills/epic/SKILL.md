@@ -1,99 +1,62 @@
 ---
 name: "epic"
-description: "Erstelle oder verfeinere Epics für das MyWeatherData-Projekt anhand des festgelegten Epic-Templates. Verwende diesen Skill wenn der Nutzer ein neues Epic anlegen, ein bestehendes Epic überarbeiten oder die Epic-Datei erweitern möchte."
-argument-hint: "Beschreibung des gewünschten Epics oder Name der Epic-Datei"
+description: "Erstelle, pruefe oder verfeinere Epics fuer das MyWeatherData-Projekt. Verwende diesen Skill fuer Requirement Engineering auf strategischer Ebene, Epic-Brainstorming, Systemgrenzen, Abhaengigkeiten und Vorbereitung von Epic Slicing."
+argument-hint: "Epic-Ziel, Feature-Idee oder Name der Epic-Datei"
 applyTo: "doc/req/*.md"
 ---
 
-# Skill: Epic erstellen – MyWeatherData
+# Skill: Epics erstellen - MyWeatherData
 
 ## Aufgabe
 
-Wenn der Nutzer ein neues Epic anlegen oder ein bestehendes Epic erweitern möchte, nutze das unten definierte **Epic-Template**. Halte dich exakt an die Struktur und Sprache (Deutsch). Füge das neue Epic in die Datei `doc/req/epic_myweatherdata.md` ein oder lege dort eine neue Sektion an.
+Erstelle oder verfeinere Epics fuer MyWeatherData in Deutsch. Ein Epic beschreibt eine groessere fachliche Initiative auf strategischer Ebene und bereitet spaetere User Stories vor.
 
----
+Nutze als Kontext:
+- `.github/copilot-instructions.md`
+- `doc/req/epic_myweatherdata.md`, falls vorhanden
+- Projektgrenzen aus MyWeatherData: DWD Climate Data Center, lokale SQLite-Datenbank, User Interface, Visualisierung und Export.
 
 ## Epic-Template
-
-Jedes Epic folgt diesem Schema:
 
 ```markdown
 ## EPIC_<NN>: <Titel>
 
-**Ziel:** <Einzeiliger Satz, der den Nutzen und den Zweck des Epics beschreibt.>
+**Ziel:** <Ein Satz, der Nutzen und Zweck des Epics beschreibt.>
 
 **Beschreibung:**
-<Zwei bis vier Sätze, die erläutern, was implementiert wird, welche Komponenten betroffen sind
-und wie das Epic in das Gesamtsystem eingebettet ist.>
+<Zwei bis vier Saetze, die beschreiben, was implementiert wird, welche Komponenten betroffen sind und wie das Epic in das Gesamtsystem passt.>
 
 **Akzeptanzkriterien:**
-- <Kriterium 1 im Format „Gegeben … wird/kann …" oder als klare Aussage>
-- <Kriterium 2>
-- <Kriterium 3>
-- <Kriterium 4>
-- <Kriterium 5>
+- <Messbares und testbares Kriterium 1>
+- <Messbares und testbares Kriterium 2>
+- <Messbares und testbares Kriterium 3>
+- <Messbares und testbares Kriterium 4>
 
 **Umfang:**
-- <Lieferobjekt oder Aktivität 1>
-- <Lieferobjekt oder Aktivität 2>
-- <Lieferobjekt oder Aktivität 3>
-- <Lieferobjekt oder Aktivität 4>
-- <Lieferobjekt oder Aktivität 5>
+- <Lieferobjekt oder Aktivitaet 1>
+- <Lieferobjekt oder Aktivitaet 2>
+- <Lieferobjekt oder Aktivitaet 3>
+- <Lieferobjekt oder Aktivitaet 4>
 ```
 
----
+## Regeln
 
-## Regeln für das Ausfüllen des Templates
+- Vergib IDs fortlaufend als `EPIC_01`, `EPIC_02`, ...
+- Halte bestehende IDs stabil.
+- Formuliere Akzeptanzkriterien messbar und testbar.
+- Beruecksichtige den Zeitraum 01.01.2015 bis 31.12.2025, wenn Datenabruf oder Anzeige betroffen sind.
+- Beruecksichtige Koordinaten innerhalb Deutschlands und die naechstgelegene DWD-Wetterstation.
+- Beruecksichtige Lufttemperatur, Niederschlag, Wind und Sonneneinstrahlung.
+- Nenne konkrete Lieferobjekte im Umfang.
+- Vermeide vage Formulierungen wie "einfach", "flexibel", "benutzerfreundlich" ohne pruefbares Kriterium.
 
-| Feld | Vorgabe |
-|---|---|
-| `EPIC_<NN>` | Fortlaufende zweistellige Nummer, z. B. `EPIC_05` |
-| **Ziel** | Genau ein Satz; beginnt mit einem Substantiv (Infinitiv vermeiden) |
-| **Beschreibung** | Kein Aufzählungsformat; fließender Text |
-| **Akzeptanzkriterien** | Messbar und testbar; 4–7 Punkte; Zeitraum 01.01.2015–31.12.2025 beachten wenn relevant |
-| **Umfang** | Konkrete Lieferobjekte oder Aktivitäten; 4–7 Punkte; keine vagen Aussagen |
+## Qualitaetscheck
 
----
+Pruefe jedes Epic auf:
+- fachlichen Nutzen
+- klare Systemgrenze
+- erkennbare Abhaengigkeiten
+- spaetere Zerlegbarkeit in User Stories
+- keine Vermischung mehrerer unabhaengiger Initiativen
 
-## Kontext: Bestehende Epics
-
-Die folgenden Epics existieren bereits in `doc/req/epic_myweatherdata.md`. Vergib keine bereits verwendete Nummer und vermeide inhaltliche Überschneidungen:
-
-| ID | Titel | Kern |
-|---|---|---|
-| EPIC_01 | DWD Climate Data Center API | Datenabruf vom DWD CDC via HTTP/FTP |
-| EPIC_02 | Lokale Datenbank | SQLite-Speicherung, Import/Export, Deduplizierung |
-| EPIC_03 | User Interface | GUI/Web-Oberfläche zur Konfiguration und Steuerung |
-| EPIC_04 | Visualisierung | Interaktive Zeitreihen-Diagramme, Export als PNG |
-
----
-
-## Beispiel-Output
-
-Wenn der Nutzer z. B. ein Epic für „Authentifizierung und Zugangsverwaltung" anfragt, erzeuge:
-
-```markdown
-## EPIC_05: Authentifizierung und Zugangsverwaltung
-
-**Ziel:** Absicherung des lokalen Zugangs zur Anwendung durch eine einfache Nutzerverwaltung.
-
-**Beschreibung:**
-Implementierung einer minimalen Authentifizierungsschicht, die den Start der Anwendung
-durch einen konfigurierbaren PIN oder ein Passwort schützt. Zugangsdaten werden lokal
-und sicher gespeichert. Das Modul ist als optionale Komponente konzipiert und kann
-deaktiviert werden.
-
-**Akzeptanzkriterien:**
-- Gegeben ein gesetztes Passwort, wird der Anwendungsstart ohne korrekte Eingabe verweigert.
-- Zugangsdaten werden nicht im Klartext gespeichert (mindestens bcrypt-Hash).
-- Der Nutzer kann das Passwort über die Einstellungen ändern.
-- Die Authentifizierung kann in der Konfigurationsdatei vollständig deaktiviert werden.
-- Fehlerhafte Anmeldeversuche werden im Log protokolliert.
-
-**Umfang:**
-- Konfigurationsschema für Authentifizierungseinstellungen
-- Passwort-Hashing und -Verifikation (bcrypt)
-- Login-Dialog im UI
-- Einstellungsseite zum Passwort ändern/Funktion deaktivieren
-- Unit-Tests für Hashing und Verifikationslogik
-```
+Wenn ein Epic zu gross ist, nutze oder empfehle den Skill `epic_slicing`.

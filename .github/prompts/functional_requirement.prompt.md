@@ -1,31 +1,29 @@
 ---
-
 name: "functional_requirement_myweatherdata"
-
-description: "none"
-
-argument-hint: "functional requirement file for myweatherdata project"
-
+agent: "Req_Engineer"
+description: "Leite formale Functional Requirements im EARS-Format aus MyWeatherData User Stories ab."
+argument-hint: "User-Story-ID, User-Story-Datei oder Requirement-Datei"
 ---
 
-Leite aus den bestehenden User Stories in `doc/req/user_story_myweatherdata.md` Functional Requirements für das Projekt MyWeatherData ab.
+Leite Functional Requirements fuer MyWeatherData aus den bestehenden User Stories und Akzeptanzkriterien ab.
 
-Schreibe die Functional Requirements in `doc/req/functional_requirement_myweatherdata.md`.
+Nutze als Kontext:
+- `.github/copilot-instructions.md`
+- `Modul_2.md`
+- `doc/req/epic_myweatherdata.md`
+- `doc/req/user_story_myweatherdata.md`
+- den Skill `func_req`
+- den Skill `ears_format`
 
-Verwende zwingend das EARS-Format.
+Aufgabe:
+- Transformiere den Nutzerfokus der User Stories in eine Systemsicht.
+- Verwende zwingend das EARS-Format.
+- Verwende verbindliche Formulierungen mit "muss" oder "darf nicht".
+- Vermeide "sollte", "kann", "idealerweise", "moeglichst" und "gegebenenfalls".
+- Erstelle atomare, testbare und nachvollziehbare Requirements.
+- Referenziere fuer jedes Requirement mindestens eine User Story.
 
-Nutze nur verbindliche Formulierungen mit "muss" oder "darf nicht".
+Schreibe das Ergebnis in:
+- `doc/req/functional_requirement_myweatherdata.md`
 
-Vermeide Wörter wie "sollte", "kann", "idealweise" oder "optional", außer beim EARS-Pattern Optional Feature.
-
-Verwende folgendes Format:
-
-# FR_`ID`: <requirement name>
-
-**Quelle:** <User Story ID>
-
-**Requirement:** <EARS Requirement>
-
-**EARS-Pattern:** <Ubiquitous | Event-Driven | State-Driven | Unwanted Behavior | Optional Feature | Complex>
-
-**Begründung:** <kurze Erklärung>
+Verwende Deutsch und das im Skill `func_req` definierte Format.

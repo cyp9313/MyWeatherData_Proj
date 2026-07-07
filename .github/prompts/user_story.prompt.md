@@ -1,36 +1,29 @@
 ---
-
 name: "user_story_myweatherdata"
-
-description: "none"
-
-argument-hint: "user story file for myweatherdata project"
-
+agent: "Story_Crafter"
+description: "Leite User Stories mit BDD-Akzeptanzkriterien und INVEST-Pruefung aus MyWeatherData-Epics ab."
+argument-hint: "Epic-ID, Epic-Datei oder Beschreibung der gewuenschten User Stories"
 ---
 
-Schreibe User Stories für das Projekt MyWeatherData basierend auf den bestehenden Epics in `doc/req/epic_myweatherdata.md`.
+Erstelle User Stories fuer das Projekt MyWeatherData basierend auf den bestehenden Epics.
 
-Erstelle pro Epic mindestens 2 User Stories.
+Nutze als Kontext:
+- `.github/copilot-instructions.md`
+- `Modul_2.md`
+- `doc/req/epic_myweatherdata.md`
+- den Skill `user_story`
+- den Skill `bdd_format`
+- den Skill `invest_criteria`
 
-Schreibe die User Stories in `doc/req/user_story_myweatherdata.md`.
+Aufgabe:
+- Erstelle pro Epic mindestens zwei User Stories.
+- Formuliere jede Story im Format: Als <Rolle> moechte ich <Ziel>, damit <Nutzen>.
+- Formuliere Akzeptanzkriterien im BDD-Stil mit Gegeben/Wenn/Dann.
+- Denke als Advocatus Diaboli ueber realistische Edge Cases nach.
+- Fuehre fuer jede Story eine INVEST-Pruefung durch.
+- Markiere Stories, die zu gross, zu technisch oder nicht testbar sind.
 
-Verwende folgendes Format:
+Schreibe das Ergebnis in:
+- `doc/req/user_story_myweatherdata.md`
 
-# USER_STORY_`ID`: <user story name>
-
-**Epic:** <zugehörige Epic-ID>
-
-**User Story:** Als <Rolle> möchte ich <Ziel/Aktion>, damit <Nutzen/Grund>.
-
-**Akzeptanzkriterien:**
-- Gegeben ...
-- Wenn ...
-- Dann ...
-
-**INVEST-Prüfung:**
-- Independent: <Bewertung>
-- Negotiable: <Bewertung>
-- Valuable: <Bewertung>
-- Estimable: <Bewertung>
-- Small: <Bewertung>
-- Testable: <Bewertung>
+Verwende Deutsch und das im Skill `user_story` definierte Format.

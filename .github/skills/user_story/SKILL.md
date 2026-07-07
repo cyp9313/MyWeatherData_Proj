@@ -1,22 +1,21 @@
 ---
-
 name: "user_story"
-
-description: "Erstelle oder verfeinere User Stories für das MyWeatherData-Projekt anhand der bestehenden Epics. Verwende diesen Skill, wenn aus Epics konkrete User Stories mit Akzeptanzkriterien abgeleitet werden sollen."
-
-argument-hint: "Epic-ID oder Beschreibung der gewünschten User Story"
-
+description: "Erstelle oder verfeinere User Stories fuer MyWeatherData aus bestehenden Epics oder Epic Slices. Verwende diesen Skill fuer Nutzerperspektive, BDD-Akzeptanzkriterien, Edge Cases und INVEST-Pruefung."
+argument-hint: "Epic-ID, Epic Slice oder Beschreibung der gewuenschten User Story"
 applyTo: "doc/req/*.md"
-
 ---
 
-# Skill: User Stories erstellen – MyWeatherData
+# Skill: User Stories erstellen - MyWeatherData
 
 ## Aufgabe
 
-Wenn der Nutzer aus einem Epic User Stories ableiten möchte, nutze das unten definierte User-Story-Template. Halte dich exakt an die Struktur und Sprache Deutsch. Füge neue User Stories in die Datei `doc/req/user_story_myweatherdata.md` ein.
+Leite aus Epics oder Epic Slices konkrete User Stories ab. Schreibe aus Sicht einer Rolle, nicht aus Sicht der Implementierung.
 
----
+Nutze als Kontext:
+- `.github/copilot-instructions.md`
+- `doc/req/epic_myweatherdata.md`
+- `doc/req/epic_slicing_myweatherdata.md`, falls vorhanden
+- Skills `bdd_format` und `invest_criteria`.
 
 ## User-Story-Template
 
@@ -25,45 +24,42 @@ Wenn der Nutzer aus einem Epic User Stories ableiten möchte, nutze das unten de
 
 **Epic:** <EPIC_ID>
 
-**User Story:** Als <Rolle> möchte ich <Ziel/Aktion>, damit <Nutzen/Grund>.
+**User Story:** Als <Rolle> moechte ich <Ziel/Aktion>, damit <Nutzen/Grund>.
 
 **Akzeptanzkriterien:**
-
 - Gegeben <Ausgangszustand>, wenn <Aktion/Ereignis>, dann <erwartetes Ergebnis>.
 - Gegeben <Ausgangszustand>, wenn <Aktion/Ereignis>, dann <erwartetes Ergebnis>.
 - Gegeben <Ausgangszustand>, wenn <Aktion/Ereignis>, dann <erwartetes Ergebnis>.
 
-**INVEST-Prüfung:**
+**INVEST-Pruefung:**
+- Independent: <kurze Bewertung>
+- Negotiable: <kurze Bewertung>
+- Valuable: <kurze Bewertung>
+- Estimable: <kurze Bewertung>
+- Small: <kurze Bewertung>
+- Testable: <kurze Bewertung>
+```
 
-- Independent: <kurze Begründung>
-- Negotiable: <kurze Begründung>
-- Valuable: <kurze Begründung>
-- Estimable: <kurze Begründung>
-- Small: <kurze Begründung>
-- Testable: <kurze Begründung>
+## Regeln
 
----
+- Vergib IDs fortlaufend als `USER_STORY_01`, `USER_STORY_02`, ...
+- Jede Story referenziert genau ein bestehendes Epic.
+- Formuliere: `Als <Rolle> moechte ich <Ziel>, damit <Nutzen>.`
+- Erstelle mindestens drei testbare Akzeptanzkriterien im BDD-Stil.
+- Fuege mindestens einen realistischen Edge Case hinzu, wenn die Story Datenabruf, Validierung, Export oder Visualisierung betrifft.
+- Pruefe alle sechs INVEST-Kriterien.
+- Markiere Stories als "Split empfohlen", wenn sie mehrere unabhaengige Ziele enthalten.
 
-## Regeln für das Ausfüllen des Templates
+## Projektregeln
 
-| Feld                   | Vorgabe                                                            |
-| ---------------------- | ------------------------------------------------------------------ |
-| `USER_STORY_<NN>`      | Fortlaufende zweistellige Nummer, z. B. `USER_STORY_01`            |
-| **Epic**               | Muss eine existierende Epic-ID referenzieren                       |
-| **User Story**         | Muss dem Format „Als ... möchte ich ..., damit ..." folgen         |
-| **Akzeptanzkriterien** | 3–5 testbare Kriterien im Given/When/Then-Stil                     |
-| **INVEST-Prüfung**     | Für alle sechs INVEST-Kriterien kurze Bewertung angeben            |
-| Zeitraum               | Wenn relevant, 01.01.2015 bis 31.12.2025 beachten                  |
-| Wetterdaten            | Lufttemperatur, Niederschlag, Wind und Sonneneinstrahlung beachten |
+- Zeitraum: 01.01.2015 bis 31.12.2025.
+- Standort: Koordinaten innerhalb Deutschlands.
+- Stationswahl: naechstgelegene verfuegbare DWD-Wetterstation.
+- Wetterdaten: Lufttemperatur, Niederschlag, Wind und Sonneneinstrahlung.
 
+## Vermeide
 
-## Kontext: Bestehende Epics
-
-Die folgenden Epics existieren bereits in `doc/req/epic_myweatherdata.md`. Jede User Story muss genau einem bestehenden Epic zugeordnet werden.
-
-| ID | Titel | Kern |
-|---|---|---|
-| EPIC_01 | DWD Climate Data Center API | Datenabruf vom DWD CDC via HTTP/FTP |
-| EPIC_02 | Lokale Datenbank | SQLite-Speicherung, Import/Export, Deduplizierung |
-| EPIC_03 | User Interface | GUI/Web-Oberfläche zur Konfiguration und Steuerung |
-| EPIC_04 | Visualisierung | Interaktive Zeitreihen-Diagramme, Export als PNG |
+- technische Implementierungsdetails als Nutzerziel
+- mehrere Nutzerziele in einer Story
+- Akzeptanzkriterien ohne beobachtbares Ergebnis
+- unklare Rollen wie "Benutzer" ohne Kontext, wenn eine praezisere Rolle moeglich ist
