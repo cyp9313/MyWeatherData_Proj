@@ -1,177 +1,193 @@
-# User Stories – MyWeatherData
+# User Stories - MyWeatherData
 
 ---
 
-## USER_STORY_01: Nächstgelegene Wetterstation ermitteln
+## USER_STORY_01: Naechstgelegene DWD-Station fuer Koordinaten bestimmen
 
 **Epic:** EPIC_01
 
-**User Story:** Als Nutzer möchte ich eine geografische Koordinate eingeben, damit die Anwendung automatisch die nächstgelegene DWD-Wetterstation für meinen Standort auswählt.
+**User Story:** Als Fachanwender moechte ich eine Koordinate innerhalb Deutschlands eingeben, damit ich automatisch die naechstgelegene verfuegbare DWD-Wetterstation nutzen kann.
 
 **Akzeptanzkriterien:**
-- Gegeben eine gültige Koordinate innerhalb Deutschlands, wenn ich die Stationssuche starte, dann wird die nächstgelegene aktive DWD-Station angezeigt.
-- Gegeben mehrere nahegelegene Stationen, wenn die Distanz berechnet wird, dann wird die Station mit der kleinsten Haversine-Distanz ausgewählt.
-- Gegeben eine ungültige Koordinate, wenn ich die Stationssuche starte, dann erhalte ich eine verständliche Fehlermeldung.
-- Gegeben keine verfügbare Station in Reichweite, wenn die Suche abgeschlossen ist, dann wird der Zustand protokolliert und im UI angezeigt.
+- Gegeben eine gueltige Koordinate innerhalb Deutschlands, wenn ich die Stationssuche starte, dann wird die naechstgelegene verfuegbare DWD-Wetterstation angezeigt.
+- Gegeben mehrere nahe Stationen, wenn die Distanzberechnung ausgefuehrt wird, dann wird die Station mit der kleinsten Distanz ausgewaehlt.
+- Gegeben eine Koordinate ausserhalb Deutschlands, wenn ich die Stationssuche starte, dann wird eine fachlich klare Fehlermeldung angezeigt.
+- Gegeben keine verfuegbare Station fuer die Koordinate, wenn die Suche abgeschlossen ist, dann wird ein Fehlerzustand mit Hinweis zur Anpassung der Eingabe angezeigt.
 
-**INVEST-Prüfung:**
-- Independent: Die Story ist unabhängig umsetzbar, da sie nur die Stationssuche betrifft.
-- Negotiable: Details zur Distanzschwelle und Fehlerdarstellung sind abstimmbar.
-- Valuable: Der Nutzer erhält ohne manuelle Recherche direkt die passende Station.
-- Estimable: Aufwand ist klar abschätzbar durch definierte Such- und Distanzlogik.
-- Small: Der Funktionsumfang ist auf Eingabevalidierung und Stationsauswahl begrenzt.
-- Testable: Die Ergebnisse sind über Testkoordinaten und erwartete Stationen eindeutig prüfbar.
+**INVEST-Pruefung:**
+- Independent: Erfuellt - Die Story ist funktional auf die Stationszuordnung begrenzt.
+- Negotiable: Erfuellt - Darstellung und Wortlaut der Rueckmeldung sind abstimmbar.
+- Valuable: Erfuellt - Nutzer erhalten direkt die passende Datenquelle.
+- Estimable: Erfuellt - Eingaben, Regeln und Ergebnis sind klar definiert.
+- Small: Erfuellt - Der Umfang bleibt auf Suche und Rueckmeldung begrenzt.
+- Testable: Erfuellt - Positive und negative Koordinatenfaelle sind eindeutig testbar.
+
+**Hinweis:** Keine Markierung erforderlich.
 
 ---
 
-## USER_STORY_02: Wetterdaten vom DWD abrufen
+## USER_STORY_02: Wetterdaten fuer gueltigen Zeitraum abrufen
 
 **Epic:** EPIC_01
 
-**User Story:** Als Nutzer möchte ich Wetterdaten für Temperatur, Niederschlag, Wind und Sonneneinstrahlung abrufen, damit ich historische Messwerte für meinen gewählten Zeitraum nutzen kann.
+**User Story:** Als Fachanwender moechte ich Wetterdaten der Kategorien Lufttemperatur, Niederschlag, Wind und Sonneneinstrahlung abrufen, damit ich historische Messwerte im Projektzeitraum analysieren kann.
 
 **Akzeptanzkriterien:**
-- Gegeben eine gültige Station und Kategorieauswahl, wenn ich den Abruf starte, dann werden Datensätze für alle gewählten Wetterkategorien heruntergeladen.
-- Gegeben ein Zeitraum außerhalb 01.01.2015 bis 31.12.2025, wenn ich den Abruf starte, dann wird der Abruf mit einer validierten Fehlermeldung abgelehnt.
-- Gegeben eine temporäre Netzwerkstörung, wenn der Download fehlschlägt, dann wird der Fehler protokolliert und ein erneuter Versuch ermöglicht.
-- Gegeben ein erfolgreicher Download, wenn das Parsing abgeschlossen ist, dann liegen strukturierte Datensätze mit Zeitstempel und Stationsbezug vor.
+- Gegeben eine gueltige Station und einen Zeitraum zwischen 01.01.2015 und 31.12.2025, wenn ich den Abruf starte, dann werden die ausgewaehlten Kategorien erfolgreich geladen.
+- Gegeben einen Zeitraum ausserhalb 01.01.2015 bis 31.12.2025, wenn ich den Abruf starte, dann wird der Abruf mit einer eindeutigen Fehlermeldung abgelehnt.
+- Gegeben eine Netzwerkunterbrechung beim Abruf, wenn der Download fehlschlaegt, dann wird ein Abruffehler angezeigt und protokolliert.
+- Gegeben nur teilweise verfuegbare Kategoriedaten, wenn der Abruf abgeschlossen ist, dann werden fehlende Kategorien klar ausgewiesen.
 
-**INVEST-Prüfung:**
-- Independent: Die Story kann ohne UI-Detailimplementierung als API-Funktion geliefert werden.
-- Negotiable: Retry-Strategie und Protokolltiefe können angepasst werden.
-- Valuable: Der Nutzer erhält die zentralen Wetterdaten in einem Schritt.
-- Estimable: Der Umfang ist durch bekannte Datenquellen und Formate gut planbar.
-- Small: Fokus liegt auf Abruf, Validierung und Rückgabeformat.
-- Testable: Erfolgs- und Fehlerfälle sind mit Mock-Datenquellen reproduzierbar testbar.
+**INVEST-Pruefung:**
+- Independent: Erfuellt - Die Story fokussiert auf den Abrufprozess.
+- Negotiable: Erfuellt - Protokolltiefe und Fehlermeldungsdetail sind abstimmbar.
+- Valuable: Erfuellt - Liefert den zentralen Zugang zu historischen Wetterdaten.
+- Estimable: Erfuellt - Klarer Rahmen durch Zeitraum und Kategorien.
+- Small: Erfuellt - Scope bleibt auf Abruf und Rueckmeldung.
+- Testable: Erfuellt - Erfolgsfall, Zeitraumgrenze und Netzwerkfehler sind reproduzierbar.
+
+**Hinweis:** Keine Markierung erforderlich.
 
 ---
 
-## USER_STORY_03: Messwerte dedupliziert speichern
+## USER_STORY_03: Importierte Messwerte ohne Duplikate speichern
 
 **Epic:** EPIC_02
 
-**User Story:** Als Systembetreiber möchte ich importierte Wetterdaten ohne Duplikate speichern, damit die Datenbank konsistent bleibt und Abfragen korrekte Ergebnisse liefern.
+**User Story:** Als Systembetreiber moechte ich importierte Messwerte ohne Duplikate speichern, damit die lokale Datenbasis konsistent bleibt.
 
 **Akzeptanzkriterien:**
-- Gegeben ein bereits importierter Datensatz, wenn derselbe Datensatz erneut importiert wird, dann wird kein doppelter Eintrag angelegt.
-- Gegeben neue Messwerte, wenn der Import ausgeführt wird, dann werden nur nicht vorhandene Datensätze gespeichert.
-- Gegeben eindeutige Schlüssel aus Station, Kategorie und Zeitstempel, wenn gespeichert wird, dann wird die Eindeutigkeit technisch erzwungen.
-- Gegeben ein Importlauf mit Duplikaten, wenn der Lauf endet, dann enthält das Protokoll die Anzahl übersprungener Datensätze.
+- Gegeben neue Messwerte, wenn der Import gestartet wird, dann werden Datensaetze mit Station, Zeitstempel und Kategorie gespeichert.
+- Gegeben bereits vorhandene Datensaetze mit identischer Station, Zeitstempel und Kategorie, wenn dieselben Daten erneut importiert werden, dann werden keine Duplikate angelegt.
+- Gegeben ein Importlauf mit Duplikaten, wenn der Lauf beendet ist, dann wird die Anzahl der uebersprungenen Datensaetze protokolliert.
+- Gegeben ein ungueltiges Datenformat im Import, wenn der Import gestartet wird, dann wird der fehlerhafte Datensatz verworfen und als Fehler protokolliert.
 
-**INVEST-Prüfung:**
-- Independent: Die Story betrifft primär Persistenzregeln und ist separat entwickelbar.
-- Negotiable: Konkrete Schlüsseldefinition und Logging-Details sind verhandelbar.
-- Valuable: Konsistente Daten verhindern Fehlinterpretationen in Export und Visualisierung.
-- Estimable: Aufwand ist über Schemaanpassung und Importlogik gut abschätzbar.
-- Small: Der Scope ist klar auf Deduplizierung im Importpfad begrenzt.
-- Testable: Duplikatfälle lassen sich mit kontrollierten Importdaten eindeutig prüfen.
+**INVEST-Pruefung:**
+- Independent: Erfuellt - Die Story ist auf Persistenzlogik begrenzt.
+- Negotiable: Erfuellt - Details der Protokollausgabe sind abstimmbar.
+- Valuable: Erfuellt - Verhindert inkonsistente und redundante Daten.
+- Estimable: Erfuellt - Regeln fuer Eindeutigkeit sind klar spezifiziert.
+- Small: Erfuellt - Der Umfang umfasst nur Import und Deduplizierung.
+- Testable: Erfuellt - Duplikat- und Formatfehlerfaelle sind klar testbar.
+
+**Hinweis:** Keine Markierung erforderlich.
 
 ---
 
-## USER_STORY_04: Gefilterten Datenexport durchführen
+## USER_STORY_04: Gefilterte Wetterdaten als CSV oder JSON exportieren
 
 **Epic:** EPIC_02
 
-**User Story:** Als Nutzer möchte ich gespeicherte Wetterdaten gefiltert nach Ort, Zeitraum und Kategorie exportieren, damit ich sie außerhalb der Anwendung weiterverwenden kann.
+**User Story:** Als Datenkonsument moechte ich Wetterdaten gefiltert nach Standort, Zeitraum und Kategorie exportieren, damit ich sie in anderen Werkzeugen weiterverarbeiten kann.
 
 **Akzeptanzkriterien:**
-- Gegeben ein gewählter Ort, Zeitraum und mindestens eine Kategorie, wenn ich den Export starte, dann enthält die Exportdatei nur passende Datensätze.
-- Gegeben die Auswahl CSV, wenn der Export abgeschlossen ist, dann ist die Datei mit Kopfzeile und standardkonformen Trennzeichen erstellt.
-- Gegeben die Auswahl JSON, wenn der Export abgeschlossen ist, dann entspricht die Struktur dem dokumentierten Export-Schema.
-- Gegeben ein leeres Abfrageergebnis, wenn der Export gestartet wird, dann erhalte ich eine klare Meldung ohne leere Dateierzeugung.
+- Gegeben eine gueltige Filterauswahl fuer Standort, Zeitraum und Kategorie, wenn ich den Export starte, dann enthaelt die Exportdatei nur passende Datensaetze.
+- Gegeben das Format CSV, wenn der Export erfolgreich ist, dann wird eine CSV-Datei mit den dokumentierten Pflichtfeldern erzeugt.
+- Gegeben das Format JSON, wenn der Export erfolgreich ist, dann wird eine JSON-Datei gemaess dokumentierter Struktur erzeugt.
+- Gegeben eine leere Ergebnismenge, wenn ich den Export starte, dann wird keine Datei erzeugt und eine klare Meldung angezeigt.
 
-**INVEST-Prüfung:**
-- Independent: Die Story kann auf bestehenden Datenbankabfragen aufsetzen und ist eigenständig.
-- Negotiable: Dateinamenkonventionen und Feldreihenfolge sind abstimmbar.
-- Valuable: Exportierbare Daten erhöhen den praktischen Nutzen für Analyse und Berichte.
-- Estimable: Aufwand ist über bekannte Ausgabeformate und Filterlogik kalkulierbar.
-- Small: Der Umfang ist auf selektiven Export in zwei Formate fokussiert.
-- Testable: Filterkriterien und Dateiinhalte sind automatisiert überprüfbar.
+**INVEST-Pruefung:**
+- Independent: Erfuellt - Export ist als eigenstaendiger Nutzen umsetzbar.
+- Negotiable: Erfuellt - Dateinamenkonventionen und Feldreihenfolge sind abstimmbar.
+- Valuable: Erfuellt - Daten werden ausserhalb des Systems nutzbar.
+- Estimable: Erfuellt - Formate und Filter sind fachlich klar.
+- Small: Erfuellt - Fokus liegt auf einem klaren Exportziel.
+- Testable: Erfuellt - Dateiinhalte und Fehlfall leeres Ergebnis sind messbar pruefbar.
+
+**Hinweis:** Keine Markierung erforderlich.
 
 ---
 
-## USER_STORY_05: Suchparameter im UI konfigurieren
+## USER_STORY_05: Suchparameter im UI erfassen und validieren
 
 **Epic:** EPIC_03
 
-**User Story:** Als Nutzer möchte ich Ort, Zeitraum und Wetterkategorien in einer Oberfläche eingeben, damit ich ohne Programmierkenntnisse den Datenabruf steuern kann.
+**User Story:** Als Fachanwender moechte ich Standort, Zeitraum und Wetterkategorien im UI erfassen, damit ich den Datenprozess ohne technische Vorarbeit starten kann.
 
 **Akzeptanzkriterien:**
-- Gegeben die geöffnete Anwendung, wenn ich Koordinaten oder einen Ortsnamen eingebe, dann wird die Eingabe validiert und für die Stationssuche übernommen.
-- Gegeben eine Datumsauswahl, wenn ich Start- und Enddatum setze, dann akzeptiert das UI nur Werte zwischen 01.01.2015 und 31.12.2025.
-- Gegeben die Kategorienauswahl, wenn ich Kategorien aktiviere oder deaktiviere, dann wird die Auswahl für den Abruf korrekt gespeichert.
-- Gegeben unvollständige Pflichtangaben, wenn ich den Abruf starte, dann zeigt das UI konkrete Hinweise zur Korrektur.
+- Gegeben ein geoeffnetes UI, wenn ich eine Koordinate innerhalb Deutschlands eingebe, dann wird die Eingabe als gueltig akzeptiert.
+- Gegeben ein Start- und Enddatum innerhalb 01.01.2015 bis 31.12.2025, wenn ich die Eingabe bestaetige, dann wird der Zeitraum als gueltig gespeichert.
+- Gegeben fehlende Pflichtfelder, wenn ich den Prozessstart ausloese, dann wird der Start blockiert und die fehlenden Felder werden klar markiert.
+- Gegeben ein Enddatum vor dem Startdatum, wenn ich den Prozessstart ausloese, dann wird eine konkrete Validierungsmeldung angezeigt.
 
-**INVEST-Prüfung:**
-- Independent: Die Story fokussiert auf Eingabelogik und kann separat geliefert werden.
-- Negotiable: Layout und konkrete Validierungshinweise sind anpassbar.
-- Valuable: Nutzer können das System ohne technische Hürden bedienen.
-- Estimable: Aufwand ist durch klar definierte Eingabefelder gut einschätzbar.
-- Small: Der Umfang bleibt auf Formular und Validierungsregeln begrenzt.
-- Testable: Eingabe- und Validierungsverhalten ist mit UI-Tests prüfbar.
+**INVEST-Pruefung:**
+- Independent: Erfuellt - Die Story betrifft die Eingabelogik des UI.
+- Negotiable: Erfuellt - Layout und Meldungstexte sind abstimmbar.
+- Valuable: Erfuellt - Reduziert Fehlbedienung vor dem Prozessstart.
+- Estimable: Erfuellt - Gueltigkeitsregeln sind klar und begrenzt.
+- Small: Erfuellt - Scope bleibt auf Erfassung und Validierung.
+- Testable: Erfuellt - Pflichtfelder und Datumsgrenzen sind eindeutig testbar.
+
+**Hinweis:** Keine Markierung erforderlich.
 
 ---
 
-## USER_STORY_06: Abrufstatus im UI verfolgen
+## USER_STORY_06: Prozessstatus im UI transparent anzeigen
 
 **Epic:** EPIC_03
 
-**User Story:** Als Nutzer möchte ich den Status des Datenabrufs sehen, damit ich weiß, ob der Prozess läuft, erfolgreich war oder ein Fehler aufgetreten ist.
+**User Story:** Als Fachanwender moechte ich den Status des laufenden Prozesses sehen, damit ich den Fortschritt und Fehlerursachen nachvollziehen kann.
 
 **Akzeptanzkriterien:**
-- Gegeben ein gestarteter Abruf, wenn der Prozess aktiv ist, dann zeigt das UI den Status "laufend" mit Fortschrittsindikator.
-- Gegeben ein erfolgreich abgeschlossener Abruf, wenn der Prozess endet, dann zeigt das UI den Status "abgeschlossen" mit Ergebnisübersicht.
-- Gegeben ein technischer Fehler, wenn der Abruf abbricht, dann zeigt das UI den Status "Fehler" mit verständlicher Kurzbeschreibung.
-- Gegeben mehrere aufeinanderfolgende Abrufe, wenn ich die Historie öffne, dann sind die letzten Statusmeldungen nachvollziehbar einsehbar.
+- Gegeben ein gestarteter Prozess, wenn Daten abgerufen und gespeichert werden, dann zeigt das UI den Status laufend.
+- Gegeben ein erfolgreich beendeter Prozess, wenn der Ablauf abgeschlossen ist, dann zeigt das UI den Status abgeschlossen mit Ergebnisinformation.
+- Gegeben ein Fehler in Abruf oder Speicherung, wenn der Prozess abbricht, dann zeigt das UI den Status Fehler mit Zuordnung zum fehlerhaften Schritt.
+- Gegeben eine erneute Ausfuehrung nach einem Fehler, wenn ich den Prozess neu starte, dann wird der vorherige Fehlerstatus nicht als aktueller Lauf angezeigt.
 
-**INVEST-Prüfung:**
-- Independent: Die Story erweitert die Rückmeldungsschicht und ist modular umsetzbar.
-- Negotiable: Tiefe der Fortschrittsanzeige und Historienlänge sind verhandelbar.
-- Valuable: Transparenz über den Prozess reduziert Unsicherheit und Fehlbedienung.
-- Estimable: Aufwand ist anhand klarer Statuszustände gut planbar.
-- Small: Fokus liegt auf Anzeigezuständen und Rückmeldungen.
-- Testable: Statusübergänge und Fehlerszenarien sind reproduzierbar testbar.
+**INVEST-Pruefung:**
+- Independent: Erfuellt - Die Story fokussiert auf Rueckmeldelogik im UI.
+- Negotiable: Erfuellt - Granularitaet der Statusinfos ist abstimmbar.
+- Valuable: Erfuellt - Nutzer erhalten Transparenz ueber Prozesszustand.
+- Estimable: Erfuellt - Statuszustaende sind klar abgrenzbar.
+- Small: Erfuellt - Scope bleibt auf Status und Fehlerkommunikation.
+- Testable: Erfuellt - Statuswechsel sind deterministisch pruefbar.
+
+**Hinweis:** Keine Markierung erforderlich.
 
 ---
 
-## USER_STORY_07: Interaktive Zeitreihen anzeigen
+## USER_STORY_07: Zeitreihen pro Wetterkategorie analysieren
 
 **Epic:** EPIC_04
 
-**User Story:** Als Nutzer möchte ich Wetterdaten als interaktive Zeitreihen visualisieren, damit ich Trends und Ausreißer über den gewählten Zeitraum schnell erkenne.
+**User Story:** Als Datenanalyst moechte ich Wetterdaten als Zeitreihen pro Kategorie visualisieren, damit ich Trends und Ausreisser im Zeitraum erkennen kann.
 
 **Akzeptanzkriterien:**
-- Gegeben gespeicherte Messwerte, wenn ich eine Wetterkategorie auswähle, dann wird ein passendes Diagramm mit Zeitachse angezeigt.
-- Gegeben ein großer Zeitraum, wenn ich in das Diagramm zoome oder verschiebe, dann aktualisiert sich die Darstellung ohne Datenverlust.
-- Gegeben eine Änderung der Auflösung, wenn ich täglich, monatlich oder jährlich wähle, dann wird die Aggregation korrekt angewendet.
-- Gegeben fehlende Messwerte in Teilzeiträumen, wenn das Diagramm gerendert wird, dann werden Lücken nachvollziehbar markiert.
+- Gegeben vorhandene Messwerte in der lokalen Datenbank, wenn ich eine Wetterkategorie waehle, dann wird ein passendes Zeitreihendiagramm angezeigt.
+- Gegeben die Aufloesung taeglich, monatlich oder jaehrlich, wenn ich die Aufloesung aendere, dann wird die Darstellung korrekt aggregiert aktualisiert.
+- Gegeben fehlende Messwerte im gewaehlten Zeitraum, wenn das Diagramm geladen wird, dann werden Datenluecken deutlich markiert.
+- Gegeben keine Messwerte fuer die Auswahl, wenn ich die Visualisierung oeffne, dann wird ein Leerdatenzustand statt eines irrefuehrenden Diagramms angezeigt.
 
-**INVEST-Prüfung:**
-- Independent: Die Story ist als eigenständige Visualisierungsfunktion lieferbar.
-- Negotiable: Interaktionsumfang und Standarddiagrammtypen sind anpassbar.
-- Valuable: Visualisierte Trends unterstützen schnelle Erkenntnisse aus den Daten.
-- Estimable: Aufwand ist über Bibliotheksfunktionen und Aggregationslogik kalkulierbar.
-- Small: Scope konzentriert sich auf Anzeige, Interaktion und Aggregationsumschaltung.
-- Testable: Korrekte Darstellung ist mit Referenzdatensätzen und UI-Checks prüfbar.
+**INVEST-Pruefung:**
+- Independent: Erfuellt - Die Story betrifft die Anzeige und Aggregation.
+- Negotiable: Erfuellt - Konkreter Diagrammtyp ist abstimmbar.
+- Valuable: Erfuellt - Ermoeglicht datengetriebene Auswertung.
+- Estimable: Erfuellt - Eingaben und erwartete Darstellungen sind klar.
+- Small: Erfuellt - Der Umfang bleibt auf Visualisierung mit Aggregation.
+- Testable: Erfuellt - Anzeige, Luecken und Leerdatenzustand sind messbar testbar.
+
+**Hinweis:** Keine Markierung erforderlich.
 
 ---
 
-## USER_STORY_08: Diagramme als PNG exportieren
+## USER_STORY_08: Aktuelle Visualisierung als PNG exportieren
 
 **Epic:** EPIC_04
 
-**User Story:** Als Nutzer möchte ich erzeugte Wetterdiagramme als PNG exportieren, damit ich Ergebnisse in Präsentationen und Berichten verwenden kann.
+**User Story:** Als Fachanwender moechte ich die aktuell sichtbare Visualisierung als PNG exportieren, damit ich sie in Berichten und Praesentationen verwenden kann.
 
 **Akzeptanzkriterien:**
-- Gegeben ein gerendertes Diagramm, wenn ich den PNG-Export auslöse, dann wird eine PNG-Datei im gewählten Zielpfad gespeichert.
-- Gegeben definierte Exportparameter, wenn ich den Export starte, dann werden Titel, Achsenbeschriftungen und Legenden im Bild übernommen.
-- Gegeben ein nicht beschreibbarer Zielpfad, wenn ich den Export ausführe, dann erhalte ich eine klare Fehlermeldung ohne Anwendungsabsturz.
-- Gegeben mehrere Wetterkategorien in separaten Ansichten, wenn ich jeweils exportiere, dann entspricht jede Datei der aktuell sichtbaren Darstellung.
+- Gegeben eine sichtbare Visualisierung, wenn ich den PNG-Export starte, dann wird eine PNG-Datei im gewaehlten Zielpfad erzeugt.
+- Gegeben ein nicht beschreibbarer Zielpfad, wenn ich den Export starte, dann wird keine Datei erzeugt und ein Fehler angezeigt.
+- Gegeben eine geaenderte Filterauswahl vor dem Export, wenn ich den Export ausloese, dann entspricht die exportierte Grafik der aktuell sichtbaren Darstellung.
+- Gegeben ein technischer Fehler im Exportprozess, wenn der Export fehlschlaegt, dann bleibt die Anwendung nutzbar und zeigt eine nachvollziehbare Fehlermeldung.
 
-**INVEST-Prüfung:**
-- Independent: Die Story kann auf bestehender Visualisierung aufsetzen, ohne andere Features zu blockieren.
-- Negotiable: Dateibenennung und Standardauflösung sind abstimmbar.
-- Valuable: Exportierbare Visualisierungen sind direkt für externe Kommunikation nutzbar.
-- Estimable: Aufwand ist über klaren Exportworkflow gut abschätzbar.
-- Small: Der Umfang ist auf Exportfunktion und Fehlerbehandlung begrenzt.
-- Testable: Dateierzeugung, Format und Inhalte sind automatisiert validierbar.
+**INVEST-Pruefung:**
+- Independent: Erfuellt - Die Story ist auf den Bildexport begrenzt.
+- Negotiable: Erfuellt - Dateiname und Standardpfad sind abstimmbar.
+- Valuable: Erfuellt - Ergebnisse werden direkt extern nutzbar.
+- Estimable: Erfuellt - Eingaben und Ausgaben sind klar umrissen.
+- Small: Erfuellt - Fokus liegt auf einem einzelnen Exportziel.
+- Testable: Erfuellt - Dateierzeugung und Fehlerfall sind eindeutig pruefbar.
+
+**Hinweis:** Keine Markierung erforderlich.

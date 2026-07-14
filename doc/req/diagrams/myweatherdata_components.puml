@@ -1,0 +1,48 @@
+@startuml myweatherdata_components
+!theme plain
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+package "MyWeatherData" {
+  [UI Controller] as UI
+  [Input Validator\n(DE-Grenze, Zeitraum, Pflichtfelder)] as VAL
+  [Process Orchestrator] as ORCH
+  [Station Resolver] as ST
+  [DWD Data Client] as DWDCL
+  [Import/Persistence Service] as IMP
+  database "SQLite" as DB
+  [Export Service\n(CSV/JSON)] as EXP
+  [Visualization Service\n(Aggregation, Gap/Empty State)] as VIS
+  [PNG Export Service] as PNG
+  [Logging Service] as LOG
+  [Status Service] as STATUS
+}
+
+cloud "DWD CDC" as DWD
+folder "Dateisystem" as FS
+
+UI --> VAL : Eingaben pruefen [FR_01, FR_04, FR_15, FR_16]
+UI --> ORCH : Ablauf starten [FR_17]
+ORCH --> ST : Station bestimmen [FR_02, FR_03]
+ST --> DWDCL : Stationsdaten abrufen [FR_02]
+ORCH --> DWDCL : Wetterdaten abrufen [FR_05, FR_06, FR_07]
+DWDCL --> LOG : Abruffehler/Teilfehler [FR_06, FR_07]
+ORCH --> IMP : Daten importieren [FR_08, FR_09, FR_10]
+IMP --> DB : upsert/store [FR_08]
+IMP --> LOG : Duplikate/Formatfehler [FR_09, FR_10]
+ORCH --> EXP : Export anstossen [FR_11, FR_14]
+EXP --> DB : Filterabfrage [FR_11]
+EXP --> FS : CSV/JSON schreiben [FR_12, FR_13]
+ORCH --> VIS : Visualisierung laden [FR_19, FR_20, FR_21]
+VIS --> DB : Zeitreihendaten lesen [FR_19]
+ORCH --> PNG : PNG-Export anstossen [FR_22, FR_23, FR_24]
+PNG --> FS : PNG schreiben [FR_22]
+ORCH --> STATUS : Laufend/Abgeschlossen/Fehler [FR_17, FR_18]
+STATUS --> UI : Status anzeigen [FR_17, FR_18]
+
+note right of ORCH
+Traceability-Hub ueber den End-to-End-Fluss.
+Abgedeckte FRs: FR_01-FR_24
+end note
+
+@enduml

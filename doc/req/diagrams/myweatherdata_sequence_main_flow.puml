@@ -1,0 +1,91 @@
+@startuml myweatherdata_sequence_main_flow
+!theme plain
+skinparam shadowing false
+
+actor User
+participant UI
+participant Validator
+participant Orchestrator
+participant StationResolver
+participant DWDClient
+participant ImportService
+database SQLite
+participant ExportService
+participant VisualizationService
+participant PngExportService
+participant StatusService
+participant Logging
+
+User -> UI : Standort/Zeitraum/Kategorien eingeben
+UI -> Validator : validateInput()
+alt Pflichtfeld oder Datum ungueltig
+  Validator --> UI : validationError [FR_15, FR_16]
+  UI --> User : Prozessstart blockiert [FR_15, FR_16]
+else gueltig
+  Validator --> UI : ok
+  UI -> StatusService : setRunning() [FR_17]
+  UI -> Orchestrator : startProcess()
+
+  Orchestrator -> StationResolver : resolveNearestStation() [FR_01, FR_02]
+  alt keine Station gefunden
+    StationResolver --> Orchestrator : stationNotFound [FR_03]
+    Orchestrator -> StatusService : setError(step=station) [FR_18]
+    StatusService --> UI : error
+    UI --> User : Fehlerhinweis
+  else Station gefunden
+    StationResolver --> Orchestrator : station
+    Orchestrator -> DWDClient : fetchWeatherData(station, period, categories) [FR_04, FR_05]
+
+    alt Abruffehler
+      DWDClient -> Logging : logFetchError(ts,cause) [FR_06]
+      DWDClient --> Orchestrator : fetchFailed
+      Orchestrator -> StatusService : setError(step=fetch) [FR_18]
+    else Abruf erfolgreich
+      DWDClient --> Orchestrator : weatherData (+missingCategories) [FR_07]
+      Orchestrator -> ImportService : import(data)
+      ImportService -> SQLite : storeUnique(station,timestamp,category) [FR_08]
+      ImportService -> Logging : logSkippedDuplicates() [FR_09]
+      ImportService -> Logging : logInvalidRecords() [FR_10]
+
+      Orchestrator -> ExportService : exportFiltered() [FR_11]
+      ExportService -> SQLite : queryByFilters() [FR_11]
+      alt Ergebnismenge leer
+        ExportService --> Orchestrator : noData [FR_14]
+      else Daten vorhanden
+        alt CSV
+          ExportService --> UI : csvCreated [FR_12]
+        else JSON
+          ExportService --> UI : jsonCreated [FR_13]
+        end
+      end
+
+      Orchestrator -> VisualizationService : loadAndAggregate(resolution) [FR_19]
+      VisualizationService -> SQLite : readSeries()
+      alt keine Messwerte
+        VisualizationService --> UI : emptyState [FR_21]
+      else Messwerte mit Luecken
+        VisualizationService --> UI : chartWithGaps [FR_20]
+      else Messwerte vollstaendig
+        VisualizationService --> UI : chart
+      end
+
+      UI -> PngExportService : exportCurrentView() [FR_22]
+      alt Zielpfad unbeschreibbar
+        PngExportService --> UI : pathError [FR_23]
+      else technischer Exportfehler
+        PngExportService --> UI : exportError [FR_24]
+      else success
+        PngExportService --> UI : pngCreated [FR_22]
+      end
+
+      Orchestrator -> StatusService : setCompleted() [FR_17]
+      StatusService --> UI : completed
+    end
+  end
+end
+
+note over UI,Logging
+End-to-End-Traceability: FR_01-FR_24
+end note
+
+@enduml

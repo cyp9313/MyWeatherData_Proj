@@ -1,0 +1,33 @@
+@startuml myweatherdata_state_process
+!theme plain
+skinparam shadowing false
+
+[*] --> Idle
+
+Idle --> ValidationFailed : start with invalid input\n[FR_15, FR_16]
+ValidationFailed --> Idle : input corrected
+
+Idle --> Running : start with valid input\n[FR_17]
+
+Running --> Error_Station : station not found\n[FR_03, FR_18]
+Running --> Error_Fetch : dwd fetch failed\n[FR_06, FR_18]
+Running --> Error_Export : png path/tech error\n[FR_23, FR_24]
+
+Running --> EmptyData : no visualization data\n[FR_21]
+EmptyData --> Running : new valid request
+
+Running --> Completed : import/export/visualization done\n[FR_17]
+Completed --> Running : restart process\n[FR_17]
+
+Error_Station --> Running : retry
+Error_Fetch --> Running : retry
+Error_Export --> Running : retry
+
+Completed --> [*]
+
+note right of Running
+Aktive Verarbeitung mit Schrittzuordnung.
+FR-Referenzen: FR_17, FR_18
+end note
+
+@enduml

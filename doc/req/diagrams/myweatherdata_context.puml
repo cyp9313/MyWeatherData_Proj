@@ -1,0 +1,28 @@
+@startuml myweatherdata_context
+!theme plain
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor "Fachanwender" as User
+rectangle "DWD Climate Data Center\n(Externe Datenquelle)" as DWD
+rectangle "Dateisystem\n(CSV/JSON/PNG)" as FS
+
+rectangle "MyWeatherData System" as MWD {
+  rectangle "UI + Prozessstatus" as UI
+  rectangle "Anwendungslogik" as APP
+  rectangle "Lokale SQLite DB" as DB
+}
+
+User --> UI : Standort/Zeitraum/Kategorien setzen\n[FR_15, FR_16]
+UI --> APP : Prozess starten\n[FR_17]
+APP --> DWD : Station suchen + Wetterdaten abrufen\n[FR_01, FR_02, FR_04, FR_05]
+APP --> DB : Messwerte speichern/lesen\n[FR_08]
+APP --> FS : CSV/JSON/PNG exportieren\n[FR_11, FR_12, FR_13, FR_22]
+APP --> UI : Status/Fehler rueckmelden\n[FR_17, FR_18]
+
+note bottom of MWD
+Systemgrenzen und Interaktion gemaess Requirements.
+Zugeordnete FRs: FR_01, FR_04, FR_17
+end note
+
+@enduml

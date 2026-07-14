@@ -1,0 +1,60 @@
+@startuml myweatherdata_activity_flow
+!theme plain
+skinparam shadowing false
+start
+
+:Benutzereingaben erfassen;
+:Pflichtfelder und Datum validieren [FR_15, FR_16];
+if (Validierung OK?) then (ja)
+  :Status laufend setzen [FR_17];
+  :Deutschlandgrenze pruefen [FR_01];
+  :Naechste Station bestimmen [FR_02];
+
+  if (Station gefunden?) then (ja)
+    :DWD-Abruf mit Zeitraum + Kategorien [FR_04, FR_05];
+    if (Abruf erfolgreich?) then (ja)
+      :Fehlende Kategorien markieren [FR_07];
+      :Import in SQLite [FR_08];
+      :Duplikate zaehlen/protokollieren [FR_09];
+      :Ungueltige Datensaetze verwerfen [FR_10];
+
+      :Exportabfrage nach Filtern [FR_11];
+      if (Exportdaten vorhanden?) then (ja)
+        :CSV oder JSON erzeugen [FR_12, FR_13];
+      else (nein)
+        :Keine Exportdatei erzeugen [FR_14];
+      endif
+
+      :Visualisierungsdaten aggregieren [FR_19];
+      if (Messwerte leer?) then (ja)
+        :Leerdatenzustand anzeigen [FR_21];
+      else (nein)
+        :Datenluecken kennzeichnen [FR_20];
+      endif
+
+      :PNG-Export der aktuellen Ansicht [FR_22];
+      if (Pfad beschreibbar?) then (ja)
+        :PNG speichern;
+      else (nein)
+        :PNG-Export abbrechen [FR_23];
+        :Fehlermeldung anzeigen [FR_24];
+      endif
+
+      :Status abgeschlossen setzen [FR_17];
+      stop
+    else (nein)
+      :Abruffehler protokollieren [FR_06];
+      :Fehlerstatus mit Schrittzuordnung [FR_18];
+      stop
+    endif
+  else (nein)
+    :Fehlerzustand fehlende Station [FR_03];
+    :Fehlerstatus mit Schrittzuordnung [FR_18];
+    stop
+  endif
+else (nein)
+  :Prozessstart blockieren [FR_15, FR_16];
+  stop
+endif
+
+@enduml
