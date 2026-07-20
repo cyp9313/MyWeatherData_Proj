@@ -117,6 +117,7 @@ Vollständige Suite (24 Tests) war grün, `mypy --strict`/`ruff check`/`ruff for
 - Szenario: Enthält die reale DWD-Trennzeile z. B. doppelte Leerzeichen zwischen Spaltengruppen (abweichend von der Fixture-Annahme), würde `zeilen[1].split(" ")` leere Zwischenelemente erzeugen und die abgeleiteten Spaltenbreiten verfälschen.
 - Begründung, warum nicht als bestätigter Defekt dokumentiert: Ohne eine echte, verifizierte DWD-Beispieldatei (offener Spike-Punkt laut Plan) lässt sich nicht zuverlässig reproduzieren, ob dieses Szenario in der Praxis auftritt; ein synthetischer Test würde nur die bereits bekannte Fragilität der Spike-Annahme wiederholen, nicht einen eigenständigen neuen Fehler nachweisen.
 - Empfohlene Prüfung: Nach Abschluss des in Confirmation-Punkt 4 geforderten DWD-Format-Spikes mit einer echten Stationsliste erneut prüfen.
+- **Addendum (Phase 10R, diese Session):** Dieses Risiko ist inzwischen **überholt/gegenstandslos**. Seit Phase 6R (`pjm/import-client-implementation-plan.md`) leitet `dwd_stationsliste_parser.py` die Spaltenbreiten nicht mehr aus der Trennzeile ab, sondern verwendet feste, gegen `doc/DWD/dwd-import-contract-baseline.md` verifizierte Byte-Offsets. Die hier beschriebene Fragilität (`zeilen[1].split(" ")`) existiert im aktuellen Code nicht mehr. Dieser Eintrag bleibt gemäß Vorgabe unverändert erhalten und wird nicht gelöscht; er ist nur noch als historischer Kontext relevant.
 
 ---
 
@@ -141,3 +142,110 @@ Vollständige Suite (24 Tests) war grün, `mypy --strict`/`ruff check`/`ruff for
 - Keine bestehenden Tests wurden abgeschwächt, gelöscht oder inhaltlich verändert; lediglich Docstring-/Kommentar-Zeilenlängen in den neuen Tests wurden für `ruff format`/`ruff check` angepasst (keine Assertion-Änderungen).
 - **Vollständige Qualitätsgate-Verifikation nach den Fixes:** `pytest -v` 30/30 grün, `mypy --strict src` clean, `ruff check`/`ruff format --check` clean, kein `except Exception` in `src/`.
 - **Scope-Check:** Keine Tests für FR-002/FR-003 ergänzt; keine Prüfung von Niederschlag/Wind/Sonne/CSV/SQLite/Streamlit/Plotly; Landesgrenzprüfung explizit ausgeklammert (DQA-R1 prüft nur mathematische Grenzwerte, nicht deutsche Landesgrenzen).
+
+---
+
+# Phase 10R — Unabhängiges Destructive Re-Review (Real-DWD-Kontrakt)
+
+## Geprüfter Stand
+
+- Workspace: `MyWeatherData`, lokaler Arbeitsstand nach Abschluss von Plan-Phasen 5.5/5.6/6R/7R/8R/9R (`pjm/import-client-implementation-plan.md`, v1.1). Zu diesem Zeitpunkt: `pytest -v` 39/39 grün + 2 deselektiert (`live`-Marker), `mypy --strict src` clean, `ruff check .`/`ruff format --check .` clean, Live-Smoke-Test (`tests/integration/test_live_dwd_smoke.py`) manuell 2/2 grün (2026-07-20).
+- Geprüfte Quelle: `pjm/import-client-implementation-plan.md` (v1.1, autoritativ), `pjm/vertical-slice-prototyp.md`, FR-001/004/005/006/007/008, `tests/test_plan_import_client.md`, `tests/traceability.md`, [python-guidelines](../.github/skills/python-guidelines/SKILL.md), `arc/statische_sichten/klassensicht-import-client.puml`/`klassensicht.md`, vollständiger Produktionscode unter `src/myweatherdata/import_client/` und `src/myweatherdata/domain/`/`src/myweatherdata/ports/`, alle Unit-/Integrationstests, `tests/fixtures/dwd/` inkl. `README.md`, `doc/DWD/dwd-import-contract-baseline.md`, `.github/workflows/ci.yml`.
+
+## Formaler Requirement-Scope
+
+FR-001, FR-004, FR-005, FR-006, FR-007, FR-008. FR-002/FR-003 weiterhin zurückgestellt, keine Tests dafür ergänzt. Zusätzlich (laut Plan Phase 10R): Übereinstimmung von realem DWD-Kontrakt (Baseline-Dokument) mit tatsächlichem Parser-/Reader-/Download-Verhalten.
+
+## Ausgeführte Befehle
+
+- Verifikationsskript (temporär, außerhalb des erlaubten Schreibbereichs erzeugt und sofort wieder gelöscht) zur Bestätigung der STATIONS_ID-Feld-Hypothese gegen die reale Spaltenformatierung.
+- `pytest -m live tests/integration/test_live_dwd_smoke.py -v` — bereits vor dieser Session grün (nicht erneut gegen das Live-Netzwerk ausgeführt, um wiederholte externe Zugriffe zu vermeiden; Ergebnis unverändert aus dem letzten Entwickler-Lauf übernommen).
+- `pytest tests/unit/test_dwd_zip_reader.py tests/unit/test_lufttemperatur_importer.py -v` → 3 neue Tests rot, 11 bestehende Tests weiterhin grün.
+- `pytest -v` (Gesamtsuite) → **3 neu rot, 39 bestehende weiterhin grün, 2 deselektiert (`live`)**.
+- `ruff format --check tests/unit/test_dwd_zip_reader.py tests/unit/test_lufttemperatur_importer.py` / `ruff check` → clean nach kleiner Zeilenlängen-Korrektur in den neuen Tests.
+- `git ls-files | Select-String -Pattern '\.venv'` → kein Treffer (bestätigt: `.venv/` nicht getrackt).
+
+## Kurzstatus der vorhandenen Suite vor dieser Session
+
+39 Tests grün, 2 `live`-Tests deselektiert im Standardlauf, Qualitätsgate (`mypy --strict`, `ruff check`, `ruff format --check`) clean, Live-Smoke-Test manuell 2/2 grün. Diese Session ergänzt 3 neue, gezielt fehlschlagende Tests (DQA-5 bis DQA-7), ohne bestehende Tests oder Produktionscode zu verändern. **Aktueller Stand: 39 bestehende Tests weiterhin grün, 3 neue Tests rot.**
+
+---
+
+## DQA-5: `Messwert.station_id` verliert bei realer DWD-Spaltenformatierung die führenden Nullen und weicht von der angefragten Station ab
+
+- Status: `✅ behoben`
+- Bezug: FR-005 (Akzeptanzkriterium: „Die geladenen Werte werden in einem einheitlichen internen Format bereitgestellt"); Architekturregel Datenkonsistenz zwischen `ImportErgebnis.station.station_id` (vom `LufttemperaturImportKoordinator` gesetzt) und `ImportErgebnis.messwerte[i].station_id`
+- Betroffene Dateien: `src/myweatherdata/import_client/lufttemperatur_importer.py` (`_zu_messwerten`), `src/myweatherdata/import_client/dwd_zip_reader.py` (Ursache: `.strip()` auf rechtsbündigem `STATIONS_ID`-Feld)
+- Szenario: Die reale DWD-ZIP-Produktdatei enthält die `STATIONS_ID`-Spalte rechtsbündig ohne führende Nullen (bestätigt in `doc/DWD/dwd-import-contract-baseline.md`, Abschnitt 2, und bereits in `tests/unit/test_dwd_zip_reader.py::test_realer_auszug_wird_korrekt_eingelesen_und_validiert` als Kontraktbefund dokumentiert: Feld `"          3"` wird nach `.strip()` zu `"3"`). `LufttemperaturImporter._zu_messwerten()` übernimmt diesen Rohwert unverändert als `Messwert.station_id`, statt die im Methodenaufruf bereits bekannte, mit führenden Nullen versehene angefragte `station_id` zu verwenden.
+- Erwartetes Verhalten: `Messwert.station_id` sollte konsistent mit `ImportErgebnis.station.station_id` (z. B. `"00003"`) sein, da beide dieselbe Station referenzieren und die App laut FR-005 ein „einheitliches internes Format" liefern soll. Eine nachgelagerte Datenhaltung (SQLite, künftige Komponente), die `Station`/`Messwert` über `station_id` verknüpft, würde bei realen Daten sonst niemals einen Treffer finden (`"00003"` vs. `"3"`).
+- Tatsächliches Verhalten: Bei realen ZIP-Daten liefert `Messwert.station_id == "3"`, während `ImportErgebnis.station.station_id == "00003"` bleibt (durch `StationsFinder`/`LufttemperaturImportKoordinator` bereits korrekt mit führenden Nullen). Bei synthetischen Fixtures (`STATIONS_ID` bereits als `"00003"` ohne führende Leerzeichen im Feld hinterlegt) tritt der Defekt NICHT auf — daher blieb er bisher unentdeckt.
+- Reproduktionstest: `tests/unit/test_lufttemperatur_importer.py::test_messwert_station_id_entspricht_angefragter_stations_id_trotz_realer_formatierung`
+- Testresultat (vor Fix): Rot — `AssertionError: assert '3' == '00003'`.
+- Fix: `LufttemperaturImporter._zu_messwerten()` erhält jetzt zusätzlich die angefragte `station_id` als Parameter und verwendet diese für `Messwert.station_id` statt `rohdatensatz["STATIONS_ID"]`, analog zur bereits bestehenden Praxis in `ImportErgebnis.station=StationsTreffer(station_id=station_id, ...)` in derselben Methode.
+- Testresultat (nach Fix): Grün.
+- Verantwortlicher Folge-Agent: `sw-import-client-developer` (behoben)
+
+---
+
+## DQA-6: CSV-Zeile mit weniger Feldern als die Kopfzeile lässt `lese_rohdatensaetze()` abstürzen
+
+- Status: `✅ behoben`
+- Bezug: FR-007 (Akzeptanzkriterium: „Die App stürzt bei fehlerhaften Datensätzen nicht ab"); Plan Phase 10R / Plan-Abschnitt „DWD ZIP und Parsing" (Szenario „fehlende Pflichtspalten" / „gemischte gültige und fehlerhafte Zeilen")
+- Betroffene Dateien: `src/myweatherdata/import_client/dwd_zip_reader.py`
+- Szenario: Eine Datenzeile der Produktdatei enthält weniger `;`-getrennte Felder als die Kopfzeile (z. B. durch eine abgeschnittene/unvollständig geschriebene Zeile am Ende einer realen Datei).
+- Erwartetes Verhalten: Der unvollständige Datensatz darf den Lesevorgang nicht abstürzen lassen — analog zur bestehenden Fehlerbehandlungs-Philosophie aus FR-007 (fehlerhafte Datensätze werden übersprungen/als ungültig markiert, der restliche Import läuft weiter).
+- Tatsächliches Verhalten: `csv.DictReader` befüllt bei einer zu kurzen Zeile die fehlenden Schlüssel mit `None` (Standard-`restval`). Die anschließende Dict-Comprehension `{schluessel.strip(): wert.strip() for schluessel, wert in zeile.items()}` ruft `.strip()` auf diesem `None`-Wert auf und wirft eine unbehandelte `AttributeError: 'NoneType' object has no attribute 'strip'`, die aus `lese_rohdatensaetze()` bis zum Aufrufer (`LufttemperaturImporter.importiere()`) durchschlägt und den gesamten Import abbrechen lässt — auch wenn andere Zeilen der Datei vollständig gültig wären.
+- Reproduktionstest: `tests/unit/test_dwd_zip_reader.py::test_zeile_mit_weniger_spalten_als_kopfzeile_wird_ohne_absturz_verarbeitet`
+- Testresultat (vor Fix): Rot — `AttributeError: 'NoneType' object has no attribute 'strip'` in `dwd_zip_reader.py`, Zeile mit `{schluessel.strip(): wert.strip() for ...}`.
+- Fix: Die Dict-Comprehension in `lese_rohdatensaetze()` behandelt fehlende Werte jetzt explizit (`wert.strip() if wert is not None else ""`), sodass fehlende Felder als leerer String statt `None` erscheinen. Der bestehende `DatensatzValidator`-Vertrag (prüft Schlüssel-Anwesenheit und Formatgültigkeit der Werte) verwirft den dadurch weiterhin unvollständigen Datensatz regulär, sobald ein Pflichtfeld betroffen ist.
+- Testresultat (nach Fix): Grün.
+- Verantwortlicher Folge-Agent: `sw-import-client-developer` (behoben)
+
+---
+
+## DQA-7: CSV-Zeile mit zusätzlicher unbekannter Spalte lässt `lese_rohdatensaetze()` abstürzen
+
+- Status: `✅ behoben`
+- Bezug: FR-007 (Akzeptanzkriterium: „Die App stürzt bei fehlerhaften Datensätzen nicht ab"); Plan Phase 10R / Plan-Abschnitt „DWD ZIP und Parsing" (Szenario „zusätzliche unbekannte Spalten")
+- Betroffene Dateien: `src/myweatherdata/import_client/dwd_zip_reader.py`
+- Szenario: Eine Datenzeile enthält mehr `;`-getrennte Felder als die Kopfzeile Spaltennamen definiert (z. B. eine zusätzliche, im aktuellen Format nicht dokumentierte Spalte einer künftigen DWD-Formatversion).
+- Erwartetes Verhalten: Die zusätzliche, unbekannte Spalte darf den Lesevorgang nicht abstürzen lassen; die bekannten Spalten des Datensatzes sollten regulär nutzbar bleiben (analog zur Fehlertoleranz-Philosophie aus FR-007).
+- Tatsächliches Verhalten: `csv.DictReader` sammelt Werte ohne passenden Spaltennamen unter dem Schlüssel `None` (Standard-`restkey`) in einer Liste. Die Dict-Comprehension ruft `schluessel.strip()` auf diesem `None`-Schlüssel auf und wirft dieselbe unbehandelte `AttributeError` wie bei DQA-6, wodurch der gesamte Import abbricht.
+- Reproduktionstest: `tests/unit/test_dwd_zip_reader.py::test_zeile_mit_zusaetzlicher_unbekannter_spalte_wird_ohne_absturz_verarbeitet`
+- Testresultat (vor Fix): Rot — `AttributeError: 'NoneType' object has no attribute 'strip'` in `dwd_zip_reader.py`, identische Ursache wie DQA-6, aber ausgelöst durch den `restkey=None`-Mechanismus statt `restval=None`.
+- Fix: Dieselbe Dict-Comprehension in `lese_rohdatensaetze()` überspringt jetzt Einträge mit `schluessel is None` (den `restkey`-Eintrag) explizit, bevor `.strip()` aufgerufen wird — die bekannten, benannten Spalten bleiben davon unberührt.
+- Testresultat (nach Fix): Grün.
+- Verantwortlicher Folge-Agent: `sw-import-client-developer` (behoben)
+
+---
+
+## ⚠️ Statischer Befund (nicht automatisiert reproduzierbar, keine Produktionscode-Datei)
+
+### DQA-R4: CI-Workflow prüft nicht, dass `.venv/` nicht getrackt ist
+
+- Status: `⚠️ Risiko`
+- Bezug: `pjm/import-client-implementation-plan.md`, Phase 9R.b (verbindliche CI-Anforderung: „einen Check, dass `.venv/` nicht getrackt ist (z. B. `git ls-files | grep -q '^\.venv/' && exit 1 || exit 0`)")
+- Betroffene Datei: `.github/workflows/ci.yml`
+- Befund: Der Workflow führt `pytest`, `mypy --strict src`, `ruff check .` und `ruff format --check .` aus, enthält aber KEINEN Schritt, der überprüft, dass `.venv/` nicht im Git-Index getrackt ist. Diese Prüfung ist im Plan als expliziter Bestandteil von Phase 9R.b gefordert.
+- Begründung, warum nicht als Test reproduzierbar: Es handelt sich um eine fehlende CI-Konfigurationszeile, kein Python-Verhalten — nicht durch einen `pytest`-Test abbildbar. Lokal ist `.venv/` nachweislich nicht getrackt (`git ls-files | Select-String -Pattern '\.venv'` liefert keinen Treffer), das Risiko besteht ausschließlich darin, dass ein künftiger Regressions-Fall (`.venv/` wird versehentlich committet) von der aktuellen CI nicht erkannt würde.
+- Empfohlene Prüfung/Korrektur: `.github/workflows/ci.yml` um einen zusätzlichen Schritt ergänzen, der den Plan-Wortlaut umsetzt (liegt außerhalb des Schreibbereichs dieses Reviews, da `.github/` für `sw-destructive-reviewer` gesperrt ist).
+- Verantwortlicher Folge-Agent: `sw-import-client-developer`
+
+---
+
+## Zusammenfassung Phase 10R
+
+- **Bestätigte Defekte:** 3 (DQA-5, DQA-6, DQA-7) — alle mit fehlschlagendem Reproduktionstest belegt und anschließend (`sw-import-client-developer`) mit minimalem Fix behoben.
+- **Offene Risiken:** 1 neu (DQA-R4, CI-Konfigurationslücke, weiterhin offen — außerhalb des Schreibbereichs von `sw-destructive-reviewer`, kein reproduzierender Test möglich); die bestehenden DQA-R1 bis DQA-R3 aus der vorherigen Session bleiben unverändert offen (siehe oben) und wurden in dieser Session erneut überprüft, aber nicht neu bewertet, da sich an ihrer Grundlage nichts geändert hat.
+- **Neu erstellte/geänderte Test-Dateien:**
+  - `tests/unit/test_dwd_zip_reader.py` (2 neue Tests ergänzt: DQA-6, DQA-7)
+  - `tests/unit/test_lufttemperatur_importer.py` (1 neuer Test ergänzt: DQA-5, zusätzliche Imports `io`/`zipfile`)
+  - `tests/destructive-qa-log.md` (dieser Abschnitt)
+- **Keine Fixture-Dateien unter `tests/fixtures/dwd/` ergänzt** — alle drei neuen Tests konstruieren ihre ZIP-Bytes inline über `io.BytesIO`/`zipfile.ZipFile` (analog zu bestehenden Tests wie `test_zip_mit_mehreren_produkt_dateien_wirft_dwd_zip_format_error`), eine zusätzliche Fixture-Datei war nicht erforderlich.
+- **Fix-Phase (`sw-import-client-developer`, im Anschluss an diesen Review):**
+  - `src/myweatherdata/import_client/dwd_zip_reader.py`: Dict-Comprehension in `lese_rohdatensaetze()` behandelt fehlende Werte (`restval=None`) als leeren String und ignoriert den `restkey=None`-Eintrag bei zusätzlichen unbekannten Spalten (behebt DQA-6, DQA-7).
+  - `src/myweatherdata/import_client/lufttemperatur_importer.py`: `_zu_messwerten()` erhält zusätzlich die angefragte `station_id` als Parameter und verwendet diese für `Messwert.station_id` statt des rohen CSV-Feldes `rohdatensatz["STATIONS_ID"]` (behebt DQA-5).
+  - Keine bestehenden Tests wurden verändert; die 3 zuvor roten Reproduktionstests sind jetzt grün.
+- **Regressionsstatus (nach Fix):** `pytest -v` → **42 Tests grün, 2 deselektiert** (`live`-Marker unverändert), keine Regression. `mypy --strict src` clean, `ruff check .`/`ruff format --check .` clean, kein `except Exception` in `src/` (grep-Check, nur Docstring-Erwähnung in `http_client.py`).
+- **Real-DWD-Kontrakt-Abgleich (Phase 10R-Checkliste):** `doc/DWD/dwd-import-contract-baseline.md` existiert mit Abrufdatum, verifizierten URLs und Rohformat-Auszügen (kein reiner Annahme-Text). Stationslisten-Format und Parser-Verhalten stimmen überein (reale Byte-Offsets, verifiziert durch `test_dwd_stationsliste_parser.py`). ZIP-Namensregel und Download-Verhalten stimmen überein (`dwd_archiv_verzeichnis.py`, verifiziert durch `test_dwd_archiv_verzeichnis.py`). Produktdatei-Namensregel und ZIP-Reader-Verhalten stimmen nach den Fixes für DQA-5/6/7 nun auch bei der Feldbehandlung (`STATIONS_ID`-Spalte, CSV-Spaltenanzahl-Abweichungen) überein. Fixtures kennzeichnen ihre Herkunft (synthetisch/real-basiert) in `tests/fixtures/dwd/README.md`. Mindestens ein Offline-Fixture ist auf eine echte DWD-Datei zurückführbar (`stationsliste_real_auszug.txt`, `10minutenwerte_TU_00003_real_auszug_hist.zip`). Live-Smoke-Test ist über den `live`-Marker eindeutig vom Standardlauf getrennt; Standardlauf greift nachweislich nicht auf das Netzwerk zu (ausschließlich `FakeHttpClient` in Unit-/Integrationstests). Kein TODO/Docstring stellt eine unverifizierte Annahme mehr als „implementierte Wahrheit" dar. CI verifiziert `pytest`, `mypy --strict` und `ruff`, ABER NICHT den `.venv`-Tracking-Status (DQA-R4, weiterhin offen).
+- **Scope-Check:** Keine Tests für FR-002/FR-003 ergänzt; keine Prüfung von Niederschlag/Wind/Sonne/CSV/SQLite/Streamlit/Plotly.

@@ -13,7 +13,7 @@ from myweatherdata.domain.koordinate import Koordinate
 from myweatherdata.domain.zeitraum import Zeitraum
 from myweatherdata.import_client.import_koordinator import LufttemperaturImportKoordinator
 from myweatherdata.import_client.lufttemperatur_importer import (
-    ZIP_URL_TEMPLATE,
+    HISTORICAL_VERZEICHNIS_URL,
     LufttemperaturImporter,
 )
 from myweatherdata.import_client.stationsfinder import STATIONSLISTE_URL, StationsFinder
@@ -21,16 +21,19 @@ from tests.conftest import FakeHttpClient
 
 _FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "dwd"
 _AACHEN_STATION_ID = "00003"
+_AACHEN_ZIP_DATEINAME = f"10minutenwerte_TU_{_AACHEN_STATION_ID}_20150101_20251231_hist.zip"
 
 
 def _koordinator_mit_fixtures() -> LufttemperaturImportKoordinator:
     stationsliste_bytes = (_FIXTURES / "stationsliste_beispiel.txt").read_bytes()
     zip_bytes = (_FIXTURES / "10minutenwerte_TU_00003_beispiel_hist.zip").read_bytes()
+    listing_bytes = f'<a href="{_AACHEN_ZIP_DATEINAME}">...</a>'.encode("latin-1")
 
     http_client = FakeHttpClient(
         {
             STATIONSLISTE_URL: stationsliste_bytes,
-            ZIP_URL_TEMPLATE.format(station_id=_AACHEN_STATION_ID): zip_bytes,
+            HISTORICAL_VERZEICHNIS_URL: listing_bytes,
+            HISTORICAL_VERZEICHNIS_URL + _AACHEN_ZIP_DATEINAME: zip_bytes,
         }
     )
     stationsfinder = StationsFinder(http_client)

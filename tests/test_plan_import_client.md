@@ -49,6 +49,30 @@ Dieser Testplan ist die Checkliste für die TDD-Implementierung (Phasen 4–8) u
 | K2 | Koordinator bei FR-006-Kürzung | FR-006 | `ImportErgebnis.verwendeter_zeitraum` == tatsächlich importierter, gekürzter Zeitraum | `tests/unit/test_import_koordinator.py` |
 | E1 | End-to-End: Koordinate → Station → Messwerte, echte Fixture-Bytes, kein Netzwerkzugriff | FR-001, FR-004, FR-005, FR-006, FR-007, FR-008 | Vollständiges, korrektes `ImportErgebnis` über die gesamte Kette | `tests/integration/test_import_lufttemperatur_end_to_end.py` |
 
+## Real-DWD Contract Spike & Remediation (Phase 5.5/5.6/6R/7R)
+
+Nach dem Real-DWD Contract Spike (Phase 5.5) wurden zwei bestätigte Kontraktabweichungen
+festgestellt (siehe `doc/DWD/dwd-import-contract-baseline.md`, Abschnitt 5 – Delta-Analyse):
+(1) das feste Spaltenlayout der Stationsliste entsprach nicht dem realen Byte-Offset-Format, und
+(2) das statische ZIP-URL-Template entsprach nicht dem realen Archiv (mehrere Dateien je Station,
+Ermittlung nur über das Verzeichnis-Listing möglich). Beide Befunde wurden per Red-Green-Refactor
+behoben; die folgenden Tests belegen die Korrektur gegen real-abgeleitete Fixtures bzw. (separat,
+manuell) gegen den echten Live-Endpunkt.
+
+| # | Szenario | FR-ID | Erwartetes Ergebnis | Testdatei |
+|---|---|---|---|---|
+| R1 | Realer Stationsliste-Auszug (6 Zeilen, variierende Stationshöhen-Ziffernlänge) wird vollständig geparst | FR-001 | Alle 6 Datenzeilen als `StationsListenEintrag` | `tests/unit/test_dwd_stationsliste_parser.py` |
+| R2 | Station 00003 (Aachen) aus realem Auszug wird exakt geparst | FR-001 | `StationsListenEintrag` entspricht dokumentierten realen Feldwerten | `tests/unit/test_dwd_stationsliste_parser.py` |
+| R3 | Station mit vierstelliger Stationshöhe (Byte-Offset-Robustheit) | FR-001 (Robustheit) | Korrekte Feldwerte trotz variabler Ziffernlänge | `tests/unit/test_dwd_stationsliste_parser.py` |
+| R4 | ZIP-Dateinamen aus realem Verzeichnis-Listing extrahieren (nur passende Station) | FR-005 | Nur Dateinamen der gesuchten Station-ID | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R5 | Verzeichnis-Listing ohne Treffer für gesuchte Station | FR-005 (Robustheit) | Leere Liste | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R6 | Zeitraum überschneidet genau eine Archiv-Datei | FR-005/006 | Genau diese Datei wird ausgewählt | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R7 | Zeitraum überschneidet mehrere Archiv-Dateien (Dateigrenze) | FR-005/006 | Alle überschneidenden Dateien werden ausgewählt | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R8 | Zeitraum überschneidet keine Archiv-Datei | FR-008 | Leere Liste (führt zu Datenlücke, kein Fehler) | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R9 | Realer ZIP-Auszug (Station 00003, 20 Zeilen, 2010-01-01) wird korrekt eingelesen | FR-005 | Rohdatensätze entsprechen realen Werten; bestätigter Befund zu `STATIONS_ID` ohne führende Nullen dokumentiert | `tests/unit/test_dwd_zip_reader.py` |
+| R10 (live, manuell, nicht Teil des Standardlaufs) | Live-Abruf der echten Stationsliste über `StationsFinder` | FR-001 | Reale, nicht-leere Stationsliste korrekt geparst | `tests/integration/test_live_dwd_smoke.py` |
+| R11 (live, manuell, nicht Teil des Standardlaufs) | Live-Abruf, Lokalisierung und Lesen eines echten ZIPs über das reale Verzeichnis-Listing | FR-005 | Reale Rohdatensätze erfolgreich gelesen und validiert | `tests/integration/test_live_dwd_smoke.py` |
+
 ## Zurückgestellt (Folge-Slice, nicht Teil dieses Testplans)
 
 | FR-ID | Grund |

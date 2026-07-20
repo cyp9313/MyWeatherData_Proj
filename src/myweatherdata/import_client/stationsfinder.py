@@ -16,9 +16,9 @@ STATIONSLISTE_URL = (
     "climate/10_minutes/air_temperature/historical/"
     "zehn_min_tu_Beschreibung_Stationen.txt"
 )
-"""URL des DWD-`help`-Verzeichnisses mit der Stationsliste (Spike-Annahme,
-siehe arc/statische_sichten/klassensicht.md, Weitere Confirmation-Punkte Nr. 4;
-noch nicht gegen einen Live-Abruf verifiziert)."""
+"""URL des DWD-`help`-Verzeichnisses mit der Stationsliste. Gegen einen echten
+Live-Abruf verifiziert (Real-DWD Contract Spike, Phase 5.5, siehe
+`doc/DWD/dwd-import-contract-baseline.md`, Abschnitt 1)."""
 
 
 class StationsFinder:

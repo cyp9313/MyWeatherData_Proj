@@ -29,6 +29,10 @@ packages = ["src/myweatherdata"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not live'"
+markers = [
+    "live: Tests mit echtem Netzwerkzugriff auf opendata.dwd.de (nicht Teil des Standardlaufs, siehe pjm/import-client-implementation-plan.md Phase 5.5/8R; Ausfuehrung explizit mit `pytest -m live`).",
+]
 
 [tool.mypy]
 strict = true

@@ -65,6 +65,18 @@ class "DatensatzValidator" as DatensatzValidator {
   +validiere(rohdatensatz: dict): bool
 }
 
+class "DwdArchivVerzeichnis" as DwdArchivVerzeichnis {
+  +zip_dateinamen_aus_listing(listing_html: str, station_id: str): list[str]
+  +passende_zip_dateinamen(dateinamen: list[str], zeitraum: Zeitraum): list[str]
+}
+note bottom of DwdArchivVerzeichnis
+  Phase 7R (Real-DWD Contract Remediation): Ermittelt die
+  tatsächlich passenden ZIP-Dateien über das reale Verzeichnis-
+  Listing, da das historische Archiv mehrere Dateien je Station
+  enthält (kein einzelnes statisches ZIP-URL-Template). Reine
+  Funktionsgruppe, kein eigener Zustand.
+end note
+
 class "ImportErgebnis" as ImportErgebnis <<dataclass>> {
   +station: StationsTreffer
   +messwerte: list
@@ -89,5 +101,7 @@ SonneneinstrahlungImporter --|> MessdatenImporter
 MessdatenImporter ..> Zeitraum : nutzt
 MessdatenImporter ..> DatensatzValidator : nutzt
 MessdatenImporter ..> ImportErgebnis : erzeugt
+LufttemperaturImporter ..> DwdArchivVerzeichnis : nutzt
+DwdArchivVerzeichnis ..> Zeitraum : nutzt
 DatensatzValidator ..> ImportErgebnis : liefert validierte Datensätze für
 @enduml

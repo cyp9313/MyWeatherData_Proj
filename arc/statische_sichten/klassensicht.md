@@ -202,6 +202,18 @@ class "DatensatzValidator" as DatensatzValidator {
   +validiere(rohdatensatz: dict): bool
 }
 
+class "DwdArchivVerzeichnis" as DwdArchivVerzeichnis {
+  +zip_dateinamen_aus_listing(listing_html: str, station_id: str): list[str]
+  +passende_zip_dateinamen(dateinamen: list[str], zeitraum: Zeitraum): list[str]
+}
+note bottom of DwdArchivVerzeichnis
+  Phase 7R (Real-DWD Contract Remediation): Ermittelt die
+  tatsächlich passenden ZIP-Dateien über das reale Verzeichnis-
+  Listing, da das historische Archiv mehrere Dateien je Station
+  enthält (kein einzelnes statisches ZIP-URL-Template). Reine
+  Funktionsgruppe, kein eigener Zustand.
+end note
+
 class "ImportErgebnis" as ImportErgebnis <<dataclass>> {
   +station: StationsTreffer
   +messwerte: list
@@ -226,6 +238,8 @@ SonneneinstrahlungImporter --|> MessdatenImporter
 MessdatenImporter ..> Zeitraum : nutzt
 MessdatenImporter ..> DatensatzValidator : nutzt
 MessdatenImporter ..> ImportErgebnis : erzeugt
+LufttemperaturImporter ..> DwdArchivVerzeichnis : nutzt
+DwdArchivVerzeichnis ..> Zeitraum : nutzt
 DatensatzValidator ..> ImportErgebnis : liefert validierte Datensätze für
 @enduml
 ```
@@ -240,6 +254,7 @@ DatensatzValidator ..> ImportErgebnis : liefert validierte Datensätze für
 | `StationsFinder` | Ermittelt zu einer Koordinate die nächstgelegene DWD-Station innerhalb Deutschlands | Stationssuche | `finde_naechste(koordinate)` (FR-001, FR-004; FR-002 zurückgestellt, siehe [pjm/vertical-slice-prototyp.md](../../pjm/vertical-slice-prototyp.md)) |
 | `MessdatenImporter` (abstrakt) | Gemeinsamer Ablauf für den Import einer Messgröße: Zeitraumprüfung/-kürzung, Abruf, Validierung | Datenabruf | `importiere(station_id, zeitraum)` (Folgeausbau, nicht Phase 1 – siehe Hinweis im Diagramm) |
 | `LufttemperaturImporter` / `NiederschlagImporter` / `WindImporter` / `SonneneinstrahlungImporter` | Messgrößen-spezifische Realisierung des Abrufs und Parsens gemäß jeweiligem DWD-Rohdatenformat; in diesem Vertical Slice wird nur `LufttemperaturImporter` umgesetzt | Datenabruf | erbt `importiere(...)` (FR-005/006, FR-009/010, FR-013/014, FR-017/018) |
+| `DwdArchivVerzeichnis` | Ermittelt über das reale Verzeichnis-Listing des historischen Archivs die zum Zeitraum passenden ZIP-Dateinamen einer Station (Phase 7R Remediation, ersetzt ein ursprünglich angenommenes statisches ZIP-URL-Template, das dem realen DWD-Kontrakt widersprach, siehe `doc/DWD/dwd-import-contract-baseline.md`) | Datenabruf | `zip_dateinamen_aus_listing(listing_html, station_id)`, `passende_zip_dateinamen(dateinamen, zeitraum)` (FR-005, FR-006, FR-008) |
 | `DatensatzValidator` | Erkennt fehlerhafte/unvollständige Datensätze und markiert/überspringt sie | Validierung/Aufbereitung | `validiere(rohdatensatz)` (FR-007, FR-011, FR-015, FR-019) |
 | `ImportErgebnis` | Ergebnis eines Importvorgangs: ausgewählte Station, validierte Messwerte, tatsächlich verwendeter (ggf. gekürzter) Zeitraum und Hinweise (Kürzung/Datenlücke) | Validierung/Aufbereitung | `station`, `messwerte`, `verwendeter_zeitraum`, `hinweise` (FR-001, FR-006, FR-008, FR-012, FR-016, FR-020) |
 

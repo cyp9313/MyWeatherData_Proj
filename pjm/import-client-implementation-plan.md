@@ -237,3 +237,34 @@ Die folgenden Abschnitte aus `.github/prompts/plan-importClient.prompt.md` gelte
 - Reale DWD-Kontraktverifikation ist ein hartes Gate (Phase 5.5), keine optionale Nacharbeit.
 - Repository-Hygiene (Phase 9R.a) ist unabhängig vom Spike-Ergebnis und kann früh parallel erledigt werden.
 - CI (Phase 9R.b) prüft ausschließlich den Offline-Pfad; Live-Smoke bleibt manuell/optional.
+
+### Design-Entscheidung Phase 7R — ZIP-Ermittlung über Verzeichnis-Listing
+
+**Befund (Phase 5.5/5.6):** `ZIP_URL_TEMPLATE` (statisches Muster ohne Datumsbereich) entspricht
+nicht dem realen DWD-Namensschema. Reale Dateien heißen
+`10minutenwerte_TU_{station_id}_{begin_date}_{end_date}_hist.zip`; pro Station können **mehrere**
+ZIP-Dateien mit unterschiedlichen, nicht überlappenden Zeiträumen existieren (verifiziert für
+Station `00003`: drei Dateien).
+
+**Design-Konsequenz (vor Code-Änderung dokumentiert):**
+
+1. Neue reine Funktion `dwd_archiv_verzeichnis.zip_dateinamen_aus_listing(html, station_id)`
+   extrahiert alle ZIP-Dateinamen für eine Station aus dem HTML-Verzeichnis-Listing
+   (Regex auf `href="10minutenwerte_TU_{station_id}_..."`).
+2. Neue reine Funktion `dwd_archiv_verzeichnis.passende_zip_dateinamen(dateinamen, zeitraum)`
+   wählt aus den gefundenen Dateinamen diejenigen aus, deren im Dateinamen kodierter Datumsbereich
+   (`{begin_date}_{end_date}`) sich mit dem angefragten (bereits gekürzten) `Zeitraum` überschneidet.
+3. `LufttemperaturImporter.importiere()` ruft zuerst das Verzeichnis-Listing ab (neue Konstante
+   `HISTORICAL_VERZEICHNIS_URL`, ersetzt `ZIP_URL_TEMPLATE` als alleinige URL-Quelle), ermittelt die
+   passenden ZIP-Dateinamen, lädt jede passende Datei einzeln herunter und führt deren
+   Rohdatensätze zusammen (mehrere Downloads sind für den aktuellen Slice-Umfang akzeptabel, keine
+   Parallelisierung erforderlich).
+4. Findet sich keine passende Datei, ist das Ergebnis eine Datenlücke (FR-008), kein Fehler —
+   konsistent mit bestehendem Verhalten für einen leeren Rohdatensatz.
+5. `ZIP_URL_TEMPLATE` entfällt ersatzlos aus `lufttemperatur_importer.py` (durch `HISTORICAL_VERZEICHNIS_URL`
+   plus die zwei neuen reinen Funktionen ersetzt); bestehende Tests, die `ZIP_URL_TEMPLATE` referenzieren,
+   werden auf den neuen Mechanismus umgestellt (Fixture-HTTP-Client liefert jetzt zusätzlich ein
+   Verzeichnis-Listing unter `HISTORICAL_VERZEICHNIS_URL`).
+
+Diese Entscheidung betrifft ausschließlich den Import-Client-Adapter (kein Core-Port-Vertrag
+ändert sich: `ImportSchnittstelle.importiere_lufttemperatur()` bleibt unverändert).

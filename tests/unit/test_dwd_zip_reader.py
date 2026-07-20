@@ -59,3 +59,69 @@ def test_zip_mit_mehreren_produkt_dateien_wirft_dwd_zip_format_error() -> None:
 
     with pytest.raises(DwdZipFormatError):
         lese_rohdatensaetze(puffer.getvalue())
+
+
+# --- Phase 6R/7R: Regressionstest gegen real-basierte Fixture (Contract Spike 5.5) ---
+
+_FIXTURE_REAL_AUSZUG_PFAD = (
+    Path(__file__).resolve().parents[1]
+    / "fixtures"
+    / "dwd"
+    / "10minutenwerte_TU_00003_real_auszug_hist.zip"
+)
+
+
+def test_realer_auszug_wird_korrekt_eingelesen_und_validiert() -> None:
+    """Reale Rohdatensätze (Station 00003, Zeitraum 2010-01-01) müssen unverändert lesbar
+    sein (siehe `doc/DWD/dwd-import-contract-baseline.md`, Abschnitt 2)."""
+    zip_bytes = _FIXTURE_REAL_AUSZUG_PFAD.read_bytes()
+
+    rohdatensaetze = lese_rohdatensaetze(zip_bytes)
+
+    assert len(rohdatensaetze) == 20
+    erster = rohdatensaetze[0]
+    assert erster["MESS_DATUM"] == "201001010000"
+    assert erster["TT_10"] == "-1.2"
+    # Bestätigter Kontraktbefund (Phase 5.6): Die reale STATIONS_ID-Spalte enthält
+    # rechtsbündige Ganzzahlen ohne führende Nullen; nach .strip() bleibt "3" statt "00003".
+    assert erster["STATIONS_ID"] == "3"
+
+
+# --- Destructive QA (Phase 10R): DQA-6 (Zeile mit fehlenden Spalten am Ende) ---
+
+
+def test_zeile_mit_weniger_spalten_als_kopfzeile_wird_ohne_absturz_verarbeitet() -> None:
+    """FR-007: Eine unvollständige Zeile (fehlende Spalten am Ende, z. B. durch einen
+    abgeschnittenen Datensatz) darf `lese_rohdatensaetze()` nicht abstürzen lassen."""
+    header = "STATIONS_ID;MESS_DATUM;QN;PP_10;TT_10;TM5_10;RF_10;TD_10;eor"
+    puffer = io.BytesIO()
+    with zipfile.ZipFile(puffer, "w") as zf:
+        zf.writestr(
+            "produkt_zehn_min_tu_20200101_20200101_00003.txt",
+            # TM5_10, RF_10, TD_10 und eor fehlen in dieser Zeile.
+            header + "\r\n00003;202001010000;3;1013.1;5.4\r\n",
+        )
+
+    rohdatensaetze = lese_rohdatensaetze(puffer.getvalue())
+
+    assert len(rohdatensaetze) == 1
+
+
+# --- Destructive QA (Phase 10R): DQA-7 (Zeile mit zusätzlicher unbekannter Spalte) ---
+
+
+def test_zeile_mit_zusaetzlicher_unbekannter_spalte_wird_ohne_absturz_verarbeitet() -> None:
+    """FR-007: Eine Zeile mit mehr Feldern als die Kopfzeile (zusätzliche, unbekannte Spalte)
+    darf `lese_rohdatensaetze()` nicht abstürzen lassen."""
+    header = "STATIONS_ID;MESS_DATUM;QN;PP_10;TT_10;TM5_10;RF_10;TD_10;eor"
+    puffer = io.BytesIO()
+    with zipfile.ZipFile(puffer, "w") as zf:
+        zf.writestr(
+            "produkt_zehn_min_tu_20200101_20200101_00003.txt",
+            header + "\r\n00003;202001010000;3;1013.1;5.4;5.0;80;3.1;eor;UNBEKANNT\r\n",
+        )
+
+    rohdatensaetze = lese_rohdatensaetze(puffer.getvalue())
+
+    assert len(rohdatensaetze) == 1
+    assert rohdatensaetze[0]["TT_10"] == "5.4"

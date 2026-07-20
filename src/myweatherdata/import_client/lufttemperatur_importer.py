@@ -14,18 +14,24 @@ from myweatherdata.domain.messwert import Messgroesse, Messwert
 from myweatherdata.domain.stationstreffer import StationsTreffer
 from myweatherdata.domain.zeitraum import Zeitraum
 from myweatherdata.import_client.datensatz_validator import DatensatzValidator
+from myweatherdata.import_client.dwd_archiv_verzeichnis import (
+    passende_zip_dateinamen,
+    zip_dateinamen_aus_listing,
+)
 from myweatherdata.import_client.dwd_zip_reader import lese_rohdatensaetze
 from myweatherdata.ports.http_client_port import HttpClient
 
-ZIP_URL_TEMPLATE = (
+HISTORICAL_VERZEICHNIS_URL = (
     "https://opendata.dwd.de/climate_environment/CDC/observations_germany/"
     "climate/10_minutes/air_temperature/historical/"
-    "10minutenwerte_TU_{station_id}_hist.zip"
 )
-"""URL-Vorlage für die stationsbezogene DWD-Messdaten-ZIP (Spike-Annahme,
-siehe arc/statische_sichten/klassensicht.md, Weitere Confirmation-Punkte Nr. 4;
-vereinfacht ohne den realen Datumsbereich im Dateinamen, noch nicht gegen
-einen Live-Abruf verifiziert)."""
+"""Verzeichnis-URL des historischen 10-Minuten-Lufttemperatur-Archivs. Gegen einen
+echten Live-Abruf verifiziert (Real-DWD Contract Spike, Phase 5.5, siehe
+`doc/DWD/dwd-import-contract-baseline.md`, Abschnitt 2). Das passende ZIP für eine
+Station und einen Zeitraum wird über `dwd_archiv_verzeichnis` ermittelt, da reale
+ZIP-Dateinamen stets einen Datumsbereich enthalten und pro Station mehrere,
+nicht überlappende ZIP-Dateien existieren können (siehe Design-Entscheidung
+Phase 7R in `pjm/import-client-implementation-plan.md`)."""
 
 _ZEITSTEMPEL_FORMAT = "%Y%m%d%H%M"
 _HINWEIS_KUERZUNG = (
@@ -65,10 +71,16 @@ class LufttemperaturImporter:
             verwendeter_zeitraum = zeitraum.gekuerzt_auf_unterstuetzten_bereich()
             hinweise.append(_HINWEIS_KUERZUNG)
 
-        zip_bytes = self._http_client.get_bytes(ZIP_URL_TEMPLATE.format(station_id=station_id))
-        rohdatensaetze = lese_rohdatensaetze(zip_bytes)
+        listing_html = self._http_client.get_bytes(HISTORICAL_VERZEICHNIS_URL).decode("latin-1")
+        dateinamen = zip_dateinamen_aus_listing(listing_html, station_id)
+        passende_dateinamen = passende_zip_dateinamen(dateinamen, verwendeter_zeitraum)
 
-        messwerte = self._zu_messwerten(rohdatensaetze, verwendeter_zeitraum)
+        rohdatensaetze: list[dict[str, str]] = []
+        for dateiname in passende_dateinamen:
+            zip_bytes = self._http_client.get_bytes(HISTORICAL_VERZEICHNIS_URL + dateiname)
+            rohdatensaetze.extend(lese_rohdatensaetze(zip_bytes))
+
+        messwerte = self._zu_messwerten(station_id, rohdatensaetze, verwendeter_zeitraum)
 
         if not messwerte:
             hinweise.append(_HINWEIS_DATENLUECKE)
@@ -81,7 +93,7 @@ class LufttemperaturImporter:
         )
 
     def _zu_messwerten(
-        self, rohdatensaetze: list[dict[str, str]], zeitraum: Zeitraum
+        self, station_id: str, rohdatensaetze: list[dict[str, str]], zeitraum: Zeitraum
     ) -> list[Messwert]:
         messwerte: list[Messwert] = []
         for rohdatensatz in rohdatensaetze:
@@ -92,7 +104,11 @@ class LufttemperaturImporter:
                 continue
             messwerte.append(
                 Messwert(
-                    station_id=rohdatensatz["STATIONS_ID"],
+                    # Die angefragte station_id (nicht das rohe CSV-Feld) wird verwendet,
+                    # da die reale STATIONS_ID-Spalte rechtsbündig ohne führende Nullen
+                    # vorliegt (Contract Baseline Abschnitt 2) und sonst inkonsistent zu
+                    # ImportErgebnis.station.station_id wäre (DQA-5).
+                    station_id=station_id,
                     zeitstempel=zeitstempel,
                     messgroesse=Messgroesse.LUFTTEMPERATUR,
                     wert=float(rohdatensatz["TT_10"]),

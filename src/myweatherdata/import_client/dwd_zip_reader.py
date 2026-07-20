@@ -1,10 +1,9 @@
 """Liest die Rohdatensätze aus einer DWD-Messdaten-ZIP-Datei (FR-005).
 
-Format-Annahme (technischer Spike, siehe arc/statische_sichten/klassensicht.md,
-Abschnitt "Weitere Confirmation-Punkte", Nr. 4): Die ZIP-Datei enthält neben
-Metadaten-Dateien genau eine Datei mit Präfix `produkt_`, deren Inhalt eine
-`;`-getrennte CSV-Datei mit Kopfzeile ist (siehe
-doc/DWD/md/BESCHREIBUNG_obsgermany-climate-10min-air_temperature_de.md).
+Format gegen einen echten Live-Abruf verifiziert (Real-DWD Contract Spike,
+Phase 5.5, siehe `doc/DWD/dwd-import-contract-baseline.md`, Abschnitt 2): Die
+ZIP-Datei enthält genau eine Datei mit Präfix `produkt_`, deren Inhalt eine
+`;`-getrennte, `latin-1`-kodierte CSV-Datei mit Kopfzeile ist.
 """
 
 from __future__ import annotations
@@ -30,8 +29,19 @@ def lese_rohdatensaetze(zip_bytes: bytes) -> list[dict[str, str]]:
         raise DwdZipFormatError(f"Ungültige ZIP-Datei: {fehler}") from fehler
 
     reader = csv.DictReader(io.StringIO(inhalt), delimiter=";")
+    # `csv.DictReader` befüllt bei einer Zeile mit weniger Feldern als die Kopfzeile
+    # fehlende Werte mit `None` (restval) und sammelt bei mehr Feldern als die Kopfzeile
+    # die überzähligen Werte unter dem Schlüssel `None` (restkey). Beides sind reguläre,
+    # nicht crashende Fälle unvollständiger/zusätzlicher Spalten (FR-007): fehlende Werte
+    # werden als leerer String abgebildet (von `DatensatzValidator` als ungültig erkannt),
+    # der `restkey`-Eintrag mit unbekannten Spalten wird ignoriert.
     return [
-        {schluessel.strip(): wert.strip() for schluessel, wert in zeile.items()} for zeile in reader
+        {
+            schluessel.strip(): wert.strip() if wert is not None else ""
+            for schluessel, wert in zeile.items()
+            if schluessel is not None
+        }
+        for zeile in reader
     ]
 
 

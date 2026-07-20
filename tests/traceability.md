@@ -31,6 +31,23 @@ konkreten, grün laufenden Test hinterlegt.
 | S2 | FR-004 | `test_distanz_gleichstand_waehlt_niedrigere_stations_id` | `tests/unit/test_stationsfinder.py` |
 | S3 | FR-004 | `test_drei_stationen_mit_identischer_distanz_waehlt_niedrigste_id` | `tests/unit/test_stationsfinder.py` |
 | S4 | – (Robustheit) | `test_leere_stationsliste_wirft_value_error` | `tests/unit/test_stationsfinder.py` |
+| S5 | – (Robustheit, DQA-3) | `test_stationsliste_mit_unvollstaendiger_zeile_wird_ohne_absturz_verarbeitet` | `tests/unit/test_stationsfinder.py` |
+
+## Real-DWD Contract Spike & Remediation (Phase 5.5/5.6/6R/7R)
+
+| # | FR-ID | Testfunktion | Datei |
+|---|---|---|---|
+| R1 | FR-001 | `test_realer_auszug_liefert_alle_sechs_datenzeilen_als_eintraege` | `tests/unit/test_dwd_stationsliste_parser.py` |
+| R2 | FR-001 | `test_realer_auszug_station_00003_wird_korrekt_geparst` | `tests/unit/test_dwd_stationsliste_parser.py` |
+| R3 | FR-001 (Robustheit) | `test_realer_auszug_mit_vierstelliger_stationshoehe_wird_korrekt_geparst` | `tests/unit/test_dwd_stationsliste_parser.py` |
+| R4 | FR-005 | `test_zip_dateinamen_aus_listing_liefert_nur_dateien_der_gesuchten_station` | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R5 | FR-005 (Robustheit) | `test_zip_dateinamen_aus_listing_liefert_leere_liste_ohne_treffer` | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R6 | FR-005/006 | `test_passende_zip_dateinamen_waehlt_ueberschneidenden_zeitraum` | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R7 | FR-005/006 | `test_passende_zip_dateinamen_liefert_mehrere_bei_ueberlappung_ueber_dateigrenze` | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R8 | FR-008 | `test_passende_zip_dateinamen_liefert_leere_liste_ohne_ueberschneidung` | `tests/unit/test_dwd_archiv_verzeichnis.py` |
+| R9 | FR-005 | `test_realer_auszug_wird_korrekt_eingelesen_und_validiert` | `tests/unit/test_dwd_zip_reader.py` |
+| R10 (live, manuell) | FR-001 | `test_live_stationsliste_wird_real_geladen_und_geparst` | `tests/integration/test_live_dwd_smoke.py` |
+| R11 (live, manuell) | FR-005 | `test_live_zip_wird_lokalisiert_gelesen_und_zu_messwert_konvertiert` | `tests/integration/test_live_dwd_smoke.py` |
 
 ## Lufttemperatur-Import (Phase 7)
 
@@ -55,12 +72,12 @@ konkreten, grün laufenden Test hinterlegt.
 
 | FR-ID | Abgedeckt durch | Status |
 |---|---|---|
-| FR-001 | B1, B2, S1, S2, S3, K1, E1 | ✅ |
+| FR-001 | B1, B2, S1, S2, S3, S5, K1, E1, R1, R2, R3, R10 (live) | ✅ (fixture- und live-verifiziert) |
 | FR-004 | S2, S3, E1 | ✅ |
-| FR-005 | D1, L1, Z1, K1, E1 | ✅ |
-| FR-006 | D2, L2, K2, E1 | ✅ |
+| FR-005 | D1, L1, Z1, K1, E1, R4, R6, R7, R9, R11 (live) | ✅ (fixture- und live-verifiziert) |
+| FR-006 | D2, L2, K2, E1, R6, R7 | ✅ |
 | FR-007 | B3, B4, B5, L3, E1 | ✅ |
-| FR-008 | L4, E1 | ✅ |
+| FR-008 | L4, E1, R5, R8 | ✅ |
 | FR-002 | – | Zurückgestellt (Folge-Slice) |
 | FR-003 | – | Zurückgestellt (Folge-Slice) |
 
