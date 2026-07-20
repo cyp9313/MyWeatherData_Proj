@@ -20,10 +20,12 @@ Arbeite in Architektur-, Planungs- und Testdokumenten konsequent auf Deutsch. Ve
 
 ## Verbindlicher Kontext
 
+`pjm/import-client-implementation-plan.md` ist der EINZIGE autoritative Plan. `.github/prompts/plan-importClient.prompt.md` ist nur noch eine wiederverwendbare Vorlage/Historie und NICHT mehr maßgeblich, selbst wenn er inhaltlich abweicht. Bei Widerspruch gilt ausschließlich `pjm/import-client-implementation-plan.md`.
+
 Lies vor jeder neuen Phase mindestens:
 
 - [Projektweite Copilot-Anweisungen](../copilot-instructions.md)
-- den freigegebenen Plan unter `pjm/import-client-implementation-plan.md` oder den vom Nutzer ausdrücklich freigegebenen Plan im aktuellen Chat,
+- `pjm/import-client-implementation-plan.md` (autoritativer Plan) sowie den darin dokumentierten Phasenstatus (abgeschlossen/wiedereröffnet/neu/zurückgestellt),
 - `pjm/vertical-slice-prototyp.md`,
 - die relevanten Functional Requirements und User Stories unter `req/`,
 - `arc/statische_sichten/komponentensicht-ebene2-import-client.puml`,
@@ -31,7 +33,19 @@ Lies vor jeder neuen Phase mindestens:
 - `arc/statische_sichten/klassensicht-core.puml`,
 - die DWD-Dokumentation unter `doc/DWD/`,
 - den Testplan `tests/test_plan_import_client.md`, sobald er existiert,
+- `tests/traceability.md` und `tests/destructive-qa-log.md`, um bereits abgeschlossene und bereits geprüfte Arbeit nicht zu wiederholen oder zu widersprechen,
 - den Skill [python-guidelines](../skills/python-guidelines/SKILL.md), sobald er existiert.
+
+## Bestandsschutz (Regression First)
+
+- Behandle bestehenden grünen Code und bestehende grüne Tests als Bestandsschutz: Sie werden NICHT neu geschrieben, NICHT pauschal refaktoriert und NICHT gelöscht, nur weil eine neue Phase beginnt.
+- Führe ausschließlich die im autoritativen Plan als „wiedereröffnet" oder „neu" markierten Phasen aus. Bereits als „abgeschlossen" markierte Phasen werden nur über einen erneuten Testlauf (Regression) verifiziert, nicht neu implementiert.
+- Jede Aussage „reale DWD-Integration abgeschlossen" ist erst zulässig, nachdem Phase 5.5 (Real-DWD Contract Spike) durchlaufen und die dort definierte Blocking-Bedingung vollständig erfüllt ist. Vorher darfst du ausschließlich von „fixture-basiert abgeschlossen, real-DWD-Kontrakt unverifiziert" sprechen.
+- Wandle eine bisherige Annahme (URL, Dateiname, Encoding, Spaltenbreite, Archivstruktur) niemals ungeprüft in produktiv genutztes Verhalten um. Jede Änderung an bestehendem Produktionscode wegen eines Kontraktunterschieds setzt einen zuvor dokumentierten, verifizierten Befund aus Phase 5.5/5.6 voraus.
+- Wenn du das externe Format nicht verifizieren kannst (kein Netzwerk-/DWD-Zugriff), STOPPE die betroffene Phase, melde sie als `❌ blockiert`, und erfinde KEINE Ersatzwerte.
+- Bewahre Red-Green-Refactor auch bei Korrekturen infolge eines Kontraktbefundes: Erst ein aus der verifizierten Baseline abgeleiteter, rot bestätigter Test, dann die minimale Korrektur, dann grün.
+- Dokumentiere bei jedem Kontraktbefund das Abrufdatum und die konkrete Evidenz (URL, HTTP-Status, Rohformat-Auszug) in `doc/DWD/dwd-import-contract-baseline.md`.
+- Halte den Standard-Testlauf (`pytest`/`pytest -v`) durchgehend offline; jeglicher Live-DWD-Zugriff läuft ausschließlich über einen dedizierten `live`-Marker oder ein separates, manuell aufgerufenes Skript, das vom Standardlauf ausgeschlossen ist.
 
 Für Änderungen an statischen Architektursichten MUSST du zusätzlich die Skills
 [ar-komponenten-sicht](../skills/ar-komponenten-sicht/SKILL.md) und
@@ -66,7 +80,11 @@ Du darfst innerhalb des freigegebenen Plans:
 - Import-Client-Adapter, Parser, Reader, Validatoren, Distanzberechnung und interne Koordination implementieren,
 - Unit- und Integrationstests sowie lokale DWD-Fixtures erstellen,
 - `pytest`, `mypy`, `ruff` und andere im Plan festgelegte Prüfungen ausführen,
-- vom Destructive Reviewer erzeugte fehlschlagende Tests mit minimalen Produktionscode-Änderungen beheben.
+- vom Destructive Reviewer erzeugte fehlschlagende Tests mit minimalen Produktionscode-Änderungen beheben,
+- den Real-DWD Contract Spike (Phase 5.5) inkl. Live-Abruf gegen offizielle DWD-CDC-Ressourcen durchführen und in `doc/DWD/dwd-import-contract-baseline.md` dokumentieren,
+- die Contract Delta Analysis (Phase 5.6) sowie die daraus resultierenden Remediation-Phasen 6R/7R/8R durchführen, ausschließlich für nachgewiesene Deltas,
+- Repository-Hygiene laut Plan durchführen: `.gitignore` pflegen, bereits getrackte, eigentlich ignorierte Dateien (z. B. `__pycache__/*.pyc`) per `git rm --cached` aus dem Index entfernen, `.github/copilot-instructions.md` an den tatsächlichen Projektstand anpassen,
+- einen GitHub-Actions-CI-Workflow (Phase 9R) für den Offline-Qualitätsnachweis anlegen/pflegen.
 
 ## Harte Architekturgrenzen
 
@@ -145,23 +163,33 @@ Schreibe nur in aufgabenrelevante Dateien, insbesondere:
 - `pyproject.toml`,
 - `src/myweatherdata/domain/` und `src/myweatherdata/application/ports/` nur für abgestimmte gemeinsame Verträge,
 - den im freigegebenen Plan festgelegten Import-Client-Adapterpfad,
-- `tests/` für Testplan, Unit-/Integrationstests, Fixtures und Traceability.
+- `tests/` für Testplan, Unit-/Integrationstests, Fixtures und Traceability,
+- `doc/DWD/dwd-import-contract-baseline.md` (Phase 5.5),
+- `tests/fixtures/dwd/README.md` (Herkunftsdokumentation synthetisch vs. real-basiert),
+- `.gitignore`, `.github/workflows/` (Phase 9R, Repository-Hygiene und CI),
+- `.github/copilot-instructions.md` ausschließlich für die im Plan benannte Korrektur des überholten Projektphasen-Textes.
 
 DO NOT Requirements ändern, IDs umnummerieren oder den Scope eigenständig erweitern.
 DO NOT fremde Komponenten implementieren oder bestehende, nicht aufgabenbezogene Dateien großflächig reformattieren.
 DO NOT Git-Commits oder Pushes ohne ausdrückliche Anweisung durchführen.
+DO NOT das lokale `.venv/`-Verzeichnis des Entwicklers löschen; Repository-Hygiene entfernt ausschließlich das Git-Tracking (`git rm --cached`), nicht das Dateisystemverzeichnis.
 
 ## Arbeitsablauf
 
-1. **Plan prüfen**: Freigegebenen Plan und offenen Confirmation Points lesen. Fehlende Freigaben als Blocker markieren.
-2. **Design und Guidelines**: Python-Guidelines sowie notwendige Architektur- und Sequenzsichten erstellen/aktualisieren.
-3. **Testplan**: Requirement-to-Test-Szenarien dokumentieren.
+1. **Plan prüfen**: `pjm/import-client-implementation-plan.md` und offenen Confirmation Points lesen. Fehlende Freigaben als Blocker markieren. Phasenstatus (abgeschlossen/wiedereröffnet/neu) feststellen.
+2. **Design und Guidelines**: Python-Guidelines sowie notwendige Architektur- und Sequenzsichten erstellen/aktualisieren (nur bei wiedereröffneten/neuen Phasen).
+3. **Testplan**: Requirement-to-Test-Szenarien dokumentieren (nur bei wiedereröffneten/neuen Phasen).
 4. **Scaffolding**: Vollständige minimale Verzeichnis- und Konfigurationsstruktur erstellen, aber keine vorgezogene Geschäftslogik.
 5. **TDD-Zyklen**: Verhalten schrittweise Red → Green → Refactor umsetzen.
 6. **Integration**: Adapter intern mit realistischen lokalen Fixtures testen, ohne Netzwerk.
-7. **Qualitätsgate**: Tests, Typprüfung, Linting, Formatprüfung und Traceability ausführen.
-8. **Abschlussbericht**: Änderungen, Testresultate, Architekturentscheidungen, offene Risiken und Definition of Done zusammenfassen.
-9. **Handoff**: Nach bestandenem Qualitätsgate den Handoff „Destructive QA starten“ anbieten.
+7. **Real-DWD Contract Spike (Phase 5.5)**: Vor jeder Behauptung „reale Integration abgeschlossen" gegen offizielle DWD-Live-Ressourcen verifizieren, Baseline-Dokument erstellen, oder als `❌ blockiert` melden, wenn kein Zugriff möglich ist.
+8. **Contract Delta Analysis (Phase 5.6)**: Verifizierten Kontrakt gegen bestehenden Code/Fixtures/Doku abgleichen, Delta-Liste erzeugen.
+9. **Remediation (6R/7R)**: Nur nachgewiesene Deltas per Red-Green-Refactor korrigieren.
+10. **Regression & Live-Smoke (8R)**: Gesamtsuite erneut grün bestätigen, Live-Smoke separat und manuell ausführen.
+11. **Repository-Hygiene & CI (9R)**: `.gitignore`/Git-Tracking bereinigen, `copilot-instructions.md` aktualisieren, CI-Workflow anlegen/pflegen.
+12. **Qualitätsgate**: Tests, Typprüfung, Linting, Formatprüfung und Traceability ausführen.
+13. **Abschlussbericht**: Getrennt nach Fixture-Status, Real-DWD-Kontraktstatus, Live-Smoke-Status, Offline-Regressionsstatus, CI-Status und verbleibenden Kontrakt-Risiken berichten.
+14. **Handoff**: Nach bestandenem Qualitätsgate den Handoff „Destructive QA starten“ anbieten.
 
 ## Output Format
 
@@ -174,7 +202,16 @@ Am Ende jeder Phase ausgeben:
 - offene Contract- oder PO-Entscheidungen,
 - nächster freigegebener Schritt.
 
-Am Ende der Implementierung zusätzlich:
+Am Ende der Implementierung MUSS der Abschlussbericht folgende sechs Punkte GETRENNT ausweisen:
+
+1. **Fixture-basierter Implementierungsstatus** (Phasen 0–5, 6, 7, 8, 9, 10),
+2. **Real-DWD-Kontraktverifikationsstatus** (Phase 5.5/5.6: verifiziert/teilweise/blockiert, mit Verweis auf `doc/DWD/dwd-import-contract-baseline.md`),
+3. **Live-Smoke-Status** (durchgeführt/nicht durchgeführt, Ergebnis, Ausführungsdatum),
+4. **Offline-Regressionsstatus** (vollständige Suite grün/rot, Testanzahl),
+5. **CI-Status** (Workflow vorhanden, letzter Lauf, geprüfte Schritte),
+6. **Verbleibende External-Contract-Risiken** (unklare/offene Punkte aus der Baseline).
+
+Zusätzlich:
 
 - Requirement-to-Test-Übersicht,
 - vollständige Test-/Lint-/Typing-Ergebnisse,

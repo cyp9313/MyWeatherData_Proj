@@ -28,10 +28,12 @@ Arbeite in Review-Dokumenten und Berichten konsequent auf Deutsch.
 
 ## Verbindlicher Kontext
 
+`pjm/import-client-implementation-plan.md` ist der EINZIGE autoritative Plan (Version 1.1 oder höher). `.github/prompts/plan-importClient.prompt.md` ist nur historische Vorlage und nicht maßgeblich.
+
 Lies vor der Prüfung:
 
 - [Projektweite Copilot-Anweisungen](../copilot-instructions.md)
-- `pjm/import-client-implementation-plan.md` oder den im aktuellen Chat freigegebenen Plan,
+- `pjm/import-client-implementation-plan.md` (autoritativer Plan, inkl. Phasen 5.5/5.6/6R/7R/8R/9R/10R),
 - `pjm/vertical-slice-prototyp.md`,
 - alle im Plan enthaltenen Functional Requirements,
 - `tests/test_plan_import_client.md`,
@@ -39,7 +41,8 @@ Lies vor der Prüfung:
 - [python-guidelines](../skills/python-guidelines/SKILL.md),
 - Import-Client-bezogene Komponenten-, Klassen- und Sequenzsichten,
 - den vollständigen Import-Client-Produktionscode,
-- alle Unit- und Integrationstests sowie DWD-Fixtures.
+- alle Unit- und Integrationstests sowie DWD-Fixtures,
+- `doc/DWD/dwd-import-contract-baseline.md`, sobald sie existiert.
 
 ## Harte Schreibgrenzen
 
@@ -151,6 +154,24 @@ Prüfe:
 - Tests erwarten konkrete interne Bibliotheksfehler statt stabiler Adapterverträge.
 
 Erzwinge keine vollständige FR-003-Fehlerbehandlung, wenn FR-003 zurückgestellt ist. Dokumentiere jedoch technologieabhängige Exception-Leaks als Architekturhygiene-Befund, sofern sie den Core-Vertrag kontaminieren.
+
+### 7. Real-DWD-Kontraktverifikation (Phase 10R)
+
+Sobald Phase 5.5/5.6 laut Plan durchlaufen wurde, prüfe zusätzlich aktiv:
+
+- `doc/DWD/dwd-import-contract-baseline.md` existiert und enthält tatsächliche Evidenz (Abrufdatum, verifizierte URLs, Rohformat-Auszug), keine bloßen Annahmen oder Vermutungen,
+- das reale Stationslisten-Format (laut Baseline) stimmt mit dem tatsächlichen Parser-Verhalten (`dwd_stationsliste_parser.py`) überein,
+- die reale ZIP-Namensregel (laut Baseline) stimmt mit dem tatsächlichen Download-Verhalten (`stationsfinder.py`, `lufttemperatur_importer.py`, insbesondere `ZIP_URL_TEMPLATE`) überein,
+- die reale Produktdatei-Namensregel (laut Baseline) stimmt mit dem tatsächlichen ZIP-Reader-Verhalten (`dwd_zip_reader.py`) überein,
+- Fixtures unter `tests/fixtures/dwd/` kennzeichnen erkennbar, ob sie synthetisch oder aus echten DWD-Daten abgeleitet sind (siehe `tests/fixtures/dwd/README.md`),
+- mindestens ein Offline-Fixture ist nachvollziehbar auf eine echte DWD-Datei zurückführbar,
+- der Live-Smoke-Test ist eindeutig vom deterministischen Standard-Suite-Lauf getrennt (dedizierter `live`-Marker oder separates Skript),
+- der Standard-Testlauf (`pytest`/`pytest -v`) greift nachweislich nicht auf das Netzwerk zu,
+- kein TODO, Docstring oder Kommentar stellt eine unverifizierte URL, ein unverifiziertes Dateinamensschema, Encoding oder eine Spaltenbreite mehr als „implementierte Wahrheit“ dar, wenn sie tatsächlich noch unverifiziert ist,
+- CI (`.github/workflows/`) verifiziert nachweislich `pytest`, `mypy --strict` und `ruff check`/`ruff format --check`,
+- `.venv/` ist laut `git ls-files` nicht getrackt.
+
+Auch diese Befunde werden nur dokumentiert (statischer Befund oder, soweit ausführbar reproduzierbar, per zusätzlichem Offline-Regressionstest), NICHT durch Änderung von Produktionscode behoben.
 
 ## Vorgehen pro Befund
 
