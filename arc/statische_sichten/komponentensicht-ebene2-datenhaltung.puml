@@ -1,0 +1,22 @@
+@startuml Komponentensicht-Ebene2-Datenhaltung
+skinparam rectangle<<Komponente>> {
+  BackgroundColor LightYellow
+}
+
+component "Core\n(Business-Logik)" as Core
+
+rectangle "Datenhaltung (SQLite)" as DB <<Komponente>> {
+  component "Speicherlogik" as Speicherlogik
+  component "Duplikatprüfung" as Duplikatpruefung
+  component "Abfragelogik" as Abfragelogik
+  database "SQLite-Datenbankdatei" as SQLiteDB
+}
+
+Core --> Speicherlogik : Aufbereitete Messdaten übergeben
+Speicherlogik --> Duplikatpruefung : Datensatz vor Speicherung prüfen
+Duplikatpruefung --> SQLiteDB : Neuen Datensatz schreiben (kein Duplikat vorhanden)
+Core --> Abfragelogik : Wetterdaten nach Station/Zeitraum/Messgröße abfragen
+Abfragelogik --> SQLiteDB : Datensätze lesen
+SQLiteDB --> Abfragelogik : Datensätze
+Abfragelogik --> Core : Wetterdaten
+@enduml

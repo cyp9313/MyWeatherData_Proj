@@ -1,0 +1,14 @@
+@startuml Fachlicher-Kontext
+skinparam rectangle<<System>> {
+  BackgroundColor LightBlue
+}
+
+actor "Nutzer:in" as Nutzer
+rectangle "MyWeatherData" as System <<System>>
+rectangle "Deutscher Wetterdienst (DWD)\nClimate Data Center" as DWD
+
+Nutzer --> System : Ort, Zeitraum und Messgrößen konfigurieren
+System --> Nutzer : Wetterdaten visualisieren
+System --> DWD : Stations- und Messdaten anfragen
+DWD --> System : Historische Wetterdaten (Lufttemperatur, Niederschlag, Wind, Sonneneinstrahlung)
+@enduml

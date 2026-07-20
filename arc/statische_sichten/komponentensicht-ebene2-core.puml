@@ -1,0 +1,26 @@
+@startuml Komponentensicht-Ebene2-Core
+skinparam rectangle<<Komponente>> {
+  BackgroundColor LightYellow
+}
+
+component "UI\n(Streamlit)" as UI
+component "Import-Client" as Import
+component "Datenhaltung\n(SQLite)" as DB
+component "Visualisierung\n(Plotly)" as Viz
+
+rectangle "Core (Business-Logik)" as Core <<Komponente>> {
+  component "Import-Orchestrierung" as ImportOrch
+  component "Abfrage-/Visualisierungs-Orchestrierung" as AbfrageOrch
+}
+
+UI --> ImportOrch : Konfiguration bestätigen (Datenabruf anstoßen)
+ImportOrch --> Import : Import anstoßen (nur bei Datenlücke)
+Import --> ImportOrch : Aufbereitete Messdaten übergeben
+ImportOrch --> DB : Aufbereitete Messdaten speichern
+ImportOrch --> AbfrageOrch : Wetterdaten abfragen (nach ggf. Import)
+AbfrageOrch --> DB : Wetterdaten abfragen
+DB --> AbfrageOrch : Wetterdaten
+AbfrageOrch --> Viz : Wetterdaten für Diagramm
+Viz --> AbfrageOrch : Diagramm
+AbfrageOrch --> UI : Diagramm anzeigen
+@enduml

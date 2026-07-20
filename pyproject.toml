@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "myweatherdata"
+version = "0.1.0"
+description = "Lokale Wetter-App zur Visualisierung historischer DWD-Wetterdaten."
+requires-python = ">=3.11"
+dependencies = [
+    "requests",
+    # "pandas" bewusst NICHT als feste Abhängigkeit aufgenommen (Decision aus
+    # plan-importClient.prompt.md): Default ist die Python-Standardbibliothek
+    # (csv/zipfile/datetime). pandas + pandas-stubs werden erst ergänzt, wenn
+    # der DWD-Format-Spike (Phase 6/7) einen klaren Implementierungsvorteil zeigt.
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "mypy",
+    "types-requests",
+    "ruff",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/myweatherdata"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
+packages = ["myweatherdata"]
+mypy_path = "src"
+
+[tool.ruff]
+src = ["src", "tests"]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

@@ -1,0 +1,22 @@
+@startuml Klassensicht-UI
+class "Konfiguration" as Konfiguration <<dataclass>> {
+  +koordinate: Koordinate
+  +zeitraum: Zeitraum
+  +messgroessen: list[Messgroesse]
+}
+
+class "KonfigurationsValidator" as KonfigurationsValidator {
+  +validiere(konfiguration: Konfiguration): bool
+}
+
+interface "DiagrammAnzeigeSchnittstelle" as IDiagrammAnzeige {
+  +zeige(diagramm: Figure): None
+}
+
+class "DiagrammAnzeige" as DiagrammAnzeige {
+  +zeige(diagramm: Figure): None
+}
+
+KonfigurationsValidator ..> Konfiguration : validiert
+DiagrammAnzeige ..|> IDiagrammAnzeige
+@enduml

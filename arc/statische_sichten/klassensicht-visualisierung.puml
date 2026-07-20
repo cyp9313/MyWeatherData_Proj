@@ -1,0 +1,32 @@
+@startuml Klassensicht-Visualisierung
+interface "VisualisierungsSchnittstelle" as IVisualisierung {
+  +erstelle(messwerte: list[Messwert], zeitraum: Zeitraum): Figure
+}
+
+abstract class "MessgroessenDiagramm" as MessgroessenDiagramm {
+  +erstelle(messwerte: list[Messwert], zeitraum: Zeitraum): Figure
+}
+
+class "LufttemperaturDiagramm" as LufttemperaturDiagramm {
+}
+
+class "NiederschlagDiagramm" as NiederschlagDiagramm {
+}
+
+class "WindDiagramm" as WindDiagramm {
+}
+
+class "SonneneinstrahlungDiagramm" as SonneneinstrahlungDiagramm {
+}
+
+class "KombiniertesDiagramm" as KombiniertesDiagramm {
+  +erstelle(diagramme: list[MessgroessenDiagramm]): Figure
+}
+
+MessgroessenDiagramm ..|> IVisualisierung
+LufttemperaturDiagramm --|> MessgroessenDiagramm
+NiederschlagDiagramm --|> MessgroessenDiagramm
+WindDiagramm --|> MessgroessenDiagramm
+SonneneinstrahlungDiagramm --|> MessgroessenDiagramm
+KombiniertesDiagramm o-- "1..4" MessgroessenDiagramm : besteht aus
+@enduml

@@ -1,0 +1,7 @@
+Stations_id von_datum bis_datum Stationshoehe geoBreite geoLaenge Stationsname                             Bundesland          
+----------- --------- --------- ------------- --------- --------- ---------------------------------------- --------------------
+00003       18910101  20211231    202         50.7827   6.0941    Aachen                                   Nordrhein-Westfalen 
+00010       19500101  20211231     30         60.0000   10.0000   Teststation Fern                         Schleswig-Holstein  
+00050       19500101  20211231    100         48.0000   11.0000   Teststation Nah                          Bayern              
+00019       19500101  20211231    200         50.5000   10.0000   Teststation Nord                         Thueringen          
+00073       19500101  20211231    200         49.5000   10.0000   Teststation Sued                         Bayern              

@@ -1,0 +1,4 @@
+Stations_id von_datum bis_datum Stationshoehe geoBreite geoLaenge Stationsname                             Bundesland          
+----------- --------- --------- ------------- --------- --------- ---------------------------------------- --------------------
+00050       19500101  20211231    100         48.0000   11.0000   Teststation Nah                          Bayern              
+00099       19500101  20211231    150

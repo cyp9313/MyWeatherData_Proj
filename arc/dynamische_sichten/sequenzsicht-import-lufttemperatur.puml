@@ -1,0 +1,54 @@
+@startuml Sequenzsicht-Import-Lufttemperatur
+participant "Core\n(DatenabrufKoordinator)" as Core
+participant "LufttemperaturImport-\nKoordinator" as Koordinator
+participant "StationsFinder" as Finder
+participant "LufttemperaturImporter" as Importer
+participant "DatensatzValidator" as Validator
+participant "Deutscher Wetterdienst\n(DWD CDC)" as DWD
+
+Core -> Koordinator : importiere_lufttemperatur(koordinate, zeitraum)
+activate Koordinator
+
+Koordinator -> Finder : finde_naechste(koordinate)
+activate Finder
+Finder -> DWD : Stationsliste anfragen
+DWD --> Finder : Stationsliste
+Finder -> Finder : Distanz je Station berechnen (Haversine)
+
+alt mehrere Stationen mit identischer Minimaldistanz (FR-004)
+  Finder -> Finder : Station mit niedrigster Stations-ID w\u00e4hlen\n(numerischer Vergleich, f\u00fchrende Nullen bleiben erhalten)
+end
+
+Finder --> Koordinator : StationsTreffer
+deactivate Finder
+
+Koordinator -> Importer : importiere(station_id, zeitraum)
+activate Importer
+
+alt Zeitraum liegt teilweise au\u00dferhalb 01.01.2015\u201331.12.2025 (FR-006)
+  Importer -> Importer : zeitraum.gekuerzt_auf_unterstuetzten_bereich()
+end
+
+Importer -> DWD : Messdaten-ZIP anfragen (Stations-ID, Zeitraum)
+DWD --> Importer : Rohdaten (ZIP/CSV)
+
+loop je Rohdatensatz
+  Importer -> Validator : validiere(rohdatensatz)
+  alt Datensatz fehlerhaft/unvollst\u00e4ndig (FR-007)
+    Validator --> Importer : verworfen
+  else Datensatz g\u00fcltig
+    Validator --> Importer : \u00fcbernommen
+  end
+end
+
+alt keine g\u00fcltigen Messwerte im verwendeten Zeitraum (FR-008, Datenl\u00fccke)
+  Importer --> Koordinator : ImportErgebnis(messwerte=[], verwendeter_zeitraum=..., hinweise=["Datenl\u00fccke"])
+else mindestens ein g\u00fcltiger Messwert (Happy Path FR-005)
+  Importer --> Koordinator : ImportErgebnis(messwerte=[...], verwendeter_zeitraum=..., hinweise=[])
+end
+deactivate Importer
+
+Koordinator -> Koordinator : ImportErgebnis.station := StationsTreffer
+Koordinator --> Core : ImportErgebnis(station, messwerte, verwendeter_zeitraum, hinweise)
+deactivate Koordinator
+@enduml

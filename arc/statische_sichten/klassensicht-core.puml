@@ -1,0 +1,36 @@
+@startuml Klassensicht-Core
+class "Konfiguration" as Konfiguration <<dataclass>> {
+  +koordinate: Koordinate
+  +zeitraum: Zeitraum
+  +messgroessen: list[Messgroesse]
+}
+
+interface "DatenabrufSchnittstelle" as IDatenabruf {
+  +bestaetige(konfiguration: Konfiguration): None
+}
+
+class "DatenabrufKoordinator" as DatenabrufKoordinator {
+  +bestaetige(konfiguration: Konfiguration): None
+}
+
+class "LaufenderAbrufWaechter" as LaufenderAbrufWaechter {
+  -laufende_konfigurationen: set
+  +ist_bereits_aktiv(konfiguration: Konfiguration): bool
+  +markiere_aktiv(konfiguration: Konfiguration): None
+  +markiere_abgeschlossen(konfiguration: Konfiguration): None
+}
+
+interface "ImportSchnittstelle" as IImport <<Port>> {
+  +importiere_lufttemperatur(koordinate: Koordinate, zeitraum: Zeitraum): ImportErgebnis
+}
+note right of IImport
+  Core/Application-eigener Port (ausgehende Abhängigkeit
+  von Core). Wird vom Import-Client (LufttemperaturImport-
+  Koordinator) realisiert, siehe klassensicht-import-client.puml.
+end note
+
+DatenabrufKoordinator ..|> IDatenabruf
+DatenabrufKoordinator ..> Konfiguration : verarbeitet
+DatenabrufKoordinator ..> LaufenderAbrufWaechter : nutzt vor Auslösung
+DatenabrufKoordinator ..> IImport : nutzt bei Datenlücke
+@enduml

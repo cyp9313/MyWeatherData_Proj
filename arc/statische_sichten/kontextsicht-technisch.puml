@@ -1,0 +1,14 @@
+@startuml Technischer-Kontext
+skinparam component<<System>> {
+  BackgroundColor LightBlue
+}
+
+actor "Nutzer:in" as Nutzer
+component "MyWeatherData\n(Streamlit-App)" as System <<System>>
+component "DWD CDC Open Data" as DWD
+
+Nutzer --> System : HTTP(S) über Browser (Streamlit-UI)
+System --> Nutzer : HTML/JS-Response (Streamlit), Plotly-Diagramme
+System --> DWD : HTTP GET (`requests`/`httpx`)
+DWD --> System : HTTP 200, CSV-Rohdaten
+@enduml

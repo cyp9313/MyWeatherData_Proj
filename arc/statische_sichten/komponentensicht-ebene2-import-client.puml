@@ -1,0 +1,23 @@
+@startuml Komponentensicht-Ebene2-Import-Client
+skinparam rectangle<<Komponente>> {
+  BackgroundColor LightYellow
+}
+
+component "Core\n(Business-Logik)" as Core
+rectangle "Deutscher Wetterdienst (DWD)\nClimate Data Center" as DWD
+
+rectangle "Import-Client" as Import <<Komponente>> {
+  component "Stationssuche" as Stationssuche
+  component "Datenabruf" as Abruf
+  component "Validierung/Aufbereitung" as Validierung
+}
+
+Core -u-> Stationssuche : Import anstoßen (inkl. Koordinate, Zeitraum)
+Stationssuche --> DWD : Stationsliste anfragen
+DWD -u-> Stationssuche : Stationsliste
+Stationssuche -u-> Abruf : Nächstgelegene Station, Zeitraum, Messgrößen
+Abruf --> DWD : Messdaten anfragen (je Messgröße)
+DWD --> Abruf : Rohdaten (CSV)
+Abruf --> Validierung : Rohdaten
+Validierung -u-> Core : Aufbereitete Messdaten übergeben
+@enduml

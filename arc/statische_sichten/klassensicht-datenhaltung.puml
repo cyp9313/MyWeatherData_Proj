@@ -1,0 +1,39 @@
+@startuml Klassensicht-Datenhaltung
+enum "Messgroesse" as Messgroesse {
+  LUFTTEMPERATUR
+  NIEDERSCHLAG
+  WIND
+  SONNENEINSTRAHLUNG
+}
+
+class "Station" as Station <<dataclass>> {
+  +station_id: str
+  +name: str
+  +breitengrad: float
+  +laengengrad: float
+}
+
+class "Messwert" as Messwert <<dataclass>> {
+  +station_id: str
+  +zeitstempel: datetime
+  +messgroesse: Messgroesse
+  +wert: float
+}
+
+interface "WetterdatenRepository" as IRepository <<Protocol>> {
+  +speichere(messwerte: list[Messwert]): None
+  +finde(station_id: str, messgroesse: Messgroesse, zeitraum: tuple): list[Messwert]
+}
+
+class "SqliteWetterdatenRepository" as SqliteRepository <<Repository>> {
+  -verbindung: Connection
+  +speichere(messwerte: list[Messwert]): None
+  +finde(station_id: str, messgroesse: Messgroesse, zeitraum: tuple): list[Messwert]
+}
+
+SqliteRepository ..|> IRepository
+Station "1" o-- "0..*" Messwert : besitzt Messwerte
+Messwert "0..*" --> "1" Messgroesse : ist vom Typ
+IRepository ..> Station : verwendet
+IRepository ..> Messwert : verwendet
+@enduml

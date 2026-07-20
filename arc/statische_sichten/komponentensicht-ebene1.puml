@@ -1,0 +1,29 @@
+@startuml Komponentensicht-Ebene1
+skinparam rectangle<<System>> {
+  BackgroundColor LightBlue
+}
+
+actor "Nutzer:in" as Nutzer
+rectangle "Deutscher Wetterdienst (DWD)\nClimate Data Center" as DWD
+
+rectangle "MyWeatherData" as System <<System>> {
+  component "UI\n(Streamlit)" as UI
+  component "Core\n(Business-Logik)" as Core
+  component "Import-Client" as Import
+  component "Datenhaltung\n(SQLite)" as DB
+  component "Visualisierung\n(Plotly)" as Viz
+}
+
+Nutzer --> UI : Ort, Zeitraum, Messgrößen konfigurieren
+UI --> Core : Import/Abfrage anstoßen
+Core --> Import : Import anstoßen
+Import --> DWD : Stations- und Messdaten anfragen
+DWD --> Import : Historische Wetterdaten
+Import --> Core : Aufbereitete Messdaten übergeben
+Core --> DB : Aufbereitete Messdaten speichern
+Core --> DB : Wetterdaten abfragen
+DB --> Core : Wetterdaten
+Core --> Viz : Wetterdaten für Diagramm
+Viz --> Core : Diagramm
+Core --> UI : Diagramm anzeigen
+@enduml

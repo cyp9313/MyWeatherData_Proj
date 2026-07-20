@@ -1,0 +1,93 @@
+@startuml Klassensicht-Import-Client
+class "Koordinate" as Koordinate <<dataclass>> {
+  +breitengrad: float
+  +laengengrad: float
+}
+
+class "Zeitraum" as Zeitraum <<dataclass>> {
+  +start: date
+  +ende: date
+  +liegt_vollstaendig_im_unterstuetzten_bereich(): bool
+  +gekuerzt_auf_unterstuetzten_bereich(): Zeitraum
+}
+
+class "StationsTreffer" as StationsTreffer <<dataclass>> {
+  +station_id: str
+  +name: str
+  +entfernung_km: float
+}
+
+interface "ImportSchnittstelle" as IImport <<Port>> {
+  +importiere_lufttemperatur(koordinate: Koordinate, zeitraum: Zeitraum): ImportErgebnis
+}
+note right of IImport
+  Core/Application-eigener Port, hier nur referenziert.
+  Kanonische Definition: klassensicht-core.puml.
+end note
+
+class "LufttemperaturImportKoordinator" as LufttemperaturImportKoordinator {
+  +importiere_lufttemperatur(koordinate: Koordinate, zeitraum: Zeitraum): ImportErgebnis
+}
+note right of LufttemperaturImportKoordinator
+  Orchestriert NUR den internen Import-Client-Ablauf
+  (StationsFinder -> LufttemperaturImporter) und ergänzt
+  ImportErgebnis.station. Ersetzt NICHT den Core-weiten
+  Ablauf (siehe DatenabrufKoordinator in klassensicht-core.puml).
+end note
+
+class "StationsFinder" as StationsFinder {
+  +finde_naechste(koordinate: Koordinate): StationsTreffer
+}
+
+abstract class "MessdatenImporter" as MessdatenImporter {
+  +importiere(station_id: str, zeitraum: Zeitraum): ImportErgebnis
+}
+note bottom of MessdatenImporter
+  Folgeausbau, nicht Phase 1: In diesem Vertical Slice wird
+  nur LufttemperaturImporter umgesetzt (YAGNI); Nieder-
+  schlag/Wind/Sonneneinstrahlung folgen erst mit eigenem
+  Bedarf.
+end note
+
+class "LufttemperaturImporter" as LufttemperaturImporter {
+}
+
+class "NiederschlagImporter" as NiederschlagImporter {
+}
+
+class "WindImporter" as WindImporter {
+}
+
+class "SonneneinstrahlungImporter" as SonneneinstrahlungImporter {
+}
+
+class "DatensatzValidator" as DatensatzValidator {
+  +validiere(rohdatensatz: dict): bool
+}
+
+class "ImportErgebnis" as ImportErgebnis <<dataclass>> {
+  +station: StationsTreffer
+  +messwerte: list
+  +verwendeter_zeitraum: Zeitraum
+  +hinweise: list[str]
+}
+note bottom of ImportErgebnis
+  station wird vom LufttemperaturImportKoordinator ergänzt
+  (nicht vom MessdatenImporter selbst).
+end note
+
+LufttemperaturImportKoordinator ..|> IImport
+LufttemperaturImportKoordinator ..> StationsFinder : nutzt
+LufttemperaturImportKoordinator ..> LufttemperaturImporter : nutzt
+LufttemperaturImportKoordinator ..> ImportErgebnis : ergänzt
+StationsFinder ..> Koordinate : nutzt
+StationsFinder ..> StationsTreffer : erzeugt
+LufttemperaturImporter --|> MessdatenImporter
+NiederschlagImporter --|> MessdatenImporter
+WindImporter --|> MessdatenImporter
+SonneneinstrahlungImporter --|> MessdatenImporter
+MessdatenImporter ..> Zeitraum : nutzt
+MessdatenImporter ..> DatensatzValidator : nutzt
+MessdatenImporter ..> ImportErgebnis : erzeugt
+DatensatzValidator ..> ImportErgebnis : liefert validierte Datensätze für
+@enduml
